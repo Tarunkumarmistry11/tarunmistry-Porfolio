@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { motion } from "framer-motion";
 import { getFeaturedProjects } from "../features/projects/projectsSlice";
 import { getAbout } from "../features/about/aboutSlice";
 import ProjectCard from "../components/ProjectCard";
@@ -9,126 +10,94 @@ import MarqueeStrip from "../components/MarqueeStrip";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const fadeUp = {
+  hidden:  { opacity: 0, y: 48 },
+  visible: {
+    opacity: 1, y: 0,
+    transition: { duration: 1.1, ease: [0.16, 1, 0.3, 1] },
+  },
+};
+
+const REEL =
+  "https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/63600c288b483e9c7398616b_reel-transcode.mp4";
+
+const HERO_WORDS = ["Tarun", "Mistry", "photographer", "&", "filmmaker"];
+
 export default function Home() {
   const dispatch = useDispatch();
-  const { featured = [], loading: projLoading, error: projError } =
-    useSelector((s) => s.projects);
-  const { data: about } = useSelector((s) => s.about);
-  const [reelVisible, setReelVisible] = useState(false);
+  const { featured = [], loading, error } = useSelector((s) => s.projects);
+  const { data: about }                   = useSelector((s) => s.about);
+  const [reel, setReel]                   = useState(false);
 
-  // Refs
-  const heroRef     = useRef(null);
-  const wordsRef    = useRef([]);
-  const reelBtnRef  = useRef(null);
-  const aboutRef    = useRef(null);
-  const marqueeRef  = useRef(null);
-  const projectsRef = useRef(null);
+  // Refs for GSAP
+  const wordRefs  = useRef([]);
+  const btnRef    = useRef(null);
 
-  const REEL_URL =
-    "https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/63600c288b483e9c7398616b_reel-transcode.mp4";
-
-  const heroText = ["Giulia", "Gartner", "photographer", "&", "filmmaker"];
-
-  // ── Fetch data ───────────────────────────────────────────
   useEffect(() => {
     dispatch(getFeaturedProjects());
     dispatch(getAbout());
   }, [dispatch]);
 
-  // ── GSAP Hero animation ──────────────────────────────────
+  // ── GSAP hero clip reveal ──────────────────────────────────
   useEffect(() => {
-    const words = wordsRef.current.filter(Boolean);
-    const btn   = reelBtnRef.current;
+    const words = wordRefs.current.filter(Boolean);
+    const btn   = btnRef.current;
     if (!words.length) return;
 
-    // Set initial state
-    gsap.set(words, { yPercent: 110, opacity: 0 });
-    gsap.set(btn,   { opacity: 0, y: 20 });
+    // Hide below clip boundary
+    gsap.set(words, { yPercent: 110 });
+    gsap.set(btn,   { autoAlpha: 0, y: 20 });
 
-    // Staggered reveal
     const tl = gsap.timeline({ delay: 0.2 });
 
     tl.to(words, {
       yPercent: 0,
-      opacity: 1,
-      duration: 1.1,
+      duration: 1.2,
       ease: "power4.out",
-      stagger: 0.08,
-    }).to(
-      btn,
-      { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
-      "-=0.4"
-    );
+      stagger: 0.1,
+    })
+    .to(btn, {
+      autoAlpha: 1, y: 0,
+      duration: 0.9,
+      ease: "power3.out",
+    }, "-=0.5");
 
     return () => tl.kill();
   }, []);
 
-  // ── GSAP Scroll reveals ──────────────────────────────────
+  // ── Reel modal ─────────────────────────────────────────────
   useEffect(() => {
-    const sections = [aboutRef.current, marqueeRef.current, projectsRef.current].filter(Boolean);
-
-    sections.forEach((el) => {
-      gsap.fromTo(
-        el,
-        { opacity: 0, y: 60 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1.1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: el,
-            start: "top 85%",
-            once: true,
-          },
-        }
-      );
-    });
-
-    return () => ScrollTrigger.getAll().forEach((t) => t.kill());
-  }, [about, featured]);
-
-  // ── Reel modal ESC + scroll lock ────────────────────────
-  useEffect(() => {
-    if (!reelVisible) return;
-    const handleKey = (e) => { if (e.key === "Escape") setReelVisible(false); };
+    if (!reel) return;
+    const fn = (e) => { if (e.key === "Escape") setReel(false); };
     document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", handleKey);
+    window.addEventListener("keydown", fn);
     return () => {
       document.body.style.overflow = "";
-      window.removeEventListener("keydown", handleKey);
+      window.removeEventListener("keydown", fn);
     };
-  }, [reelVisible]);
+  }, [reel]);
 
   return (
-    <main className="page-root">
+    <div style={{ backgroundColor: "var(--bg)", color: "var(--fg)", minHeight: "100vh" }}>
 
-      {/* ── HERO ────────────────────────────────────────── */}
-      <section
-        ref={heroRef}
-        style={{
-          position: "relative",
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-end",
-          padding: "8rem 2.5rem 5rem",
-          overflow: "hidden",
-        }}
-      >
+      {/* ── HERO ──────────────────────────────────────────── */}
+      <section style={{
+        position: "relative",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-end",
+        padding: "0 clamp(24px,5vw,80px) clamp(60px,8vh,100px)",
+      }}>
         {/* Words */}
-        <div>
-          {heroText.map((word, i) => (
+        <div style={{ paddingTop: "120px" }}>
+          {HERO_WORDS.map((word, i) => (
             <div key={word} className="hero-line">
               <span
-                ref={(el) => (wordsRef.current[i] = el)}
+                ref={(el) => (wordRefs.current[i] = el)}
                 className="hero-word"
                 style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontSize: "clamp(3rem, 10vw, 8.5rem)",
-                  lineHeight: 0.92,
-                  letterSpacing: "-0.02em",
-                  color: "var(--fg)",
+                  fontSize: "clamp(3.8rem, 11.5vw, 10.5rem)",
                 }}
               >
                 {word}
@@ -137,38 +106,28 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Play reel button */}
+        {/* Play reel */}
         <button
-          ref={reelBtnRef}
+          ref={btnRef}
           type="button"
-          onClick={() => setReelVisible(true)}
+          onClick={() => setReel(true)}
           style={{
-            marginTop: "2.5rem",
+            marginTop: "clamp(24px,4vh,48px)",
+            background: "none", border: "none",
             fontFamily: "'Space Mono', monospace",
-            fontSize: "0.72rem",
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--fg)",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "12px",
-            opacity: 0,
+            fontSize: "0.68rem", letterSpacing: "0.14em",
+            textTransform: "uppercase", color: "var(--fg)",
+            display: "inline-flex", alignItems: "center", gap: "14px",
+            visibility: "hidden",
           }}
         >
           <span
             style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "50%",
+              width: "42px", height: "42px", borderRadius: "50%",
               border: "1px solid var(--fg)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: "14px",
-              transition: "background 0.3s, color 0.3s",
+              transition: "background 0.3s ease, color 0.3s ease",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = "var(--fg)";
@@ -178,127 +137,105 @@ export default function Home() {
               e.currentTarget.style.background = "transparent";
               e.currentTarget.style.color = "var(--fg)";
             }}
-          >
-            ▶
-          </span>
+          >▶</span>
           play my reel
         </button>
       </section>
 
-      {/* ── REEL MODAL ──────────────────────────────────── */}
-      {reelVisible && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setReelVisible(false)}
+      {/* ── REEL MODAL ────────────────────────────────────── */}
+      {reel && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          onClick={() => setReel(false)}
           style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 50,
-            backgroundColor: "rgba(26,26,26,0.96)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            position: "fixed", inset: 0, zIndex: 200,
+            backgroundColor: "rgba(10,10,10,0.96)",
+            display: "flex", alignItems: "center", justifyContent: "center",
           }}
         >
           <video
-            src={REEL_URL}
-            autoPlay
-            controls
+            src={REEL} autoPlay controls
             onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: "85vw", maxHeight: "80vh" }}
+            style={{ maxWidth: "88vw", maxHeight: "82vh" }}
           />
           <button
-            onClick={() => setReelVisible(false)}
+            onClick={() => setReel(false)}
             style={{
-              position: "absolute",
-              top: "2rem",
-              right: "2rem",
-              color: "#f5f0eb",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontFamily: "'Space Mono', monospace",
-              fontSize: "0.72rem",
-              letterSpacing: "0.12em",
+              position: "absolute", top: "28px", right: "36px",
+              background: "none", border: "none",
+              color: "#f0ebe4", fontFamily: "'Space Mono', monospace",
+              fontSize: "0.68rem", letterSpacing: "0.14em",
               textTransform: "uppercase",
             }}
-          >
-            Close
-          </button>
-        </div>
+          >Close</button>
+        </motion.div>
       )}
 
-      {/* ── MARQUEE ─────────────────────────────────────── */}
+      {/* ── MARQUEE ───────────────────────────────────────── */}
       {about?.photos?.length > 0 && (
-        <div ref={marqueeRef} style={{ padding: "24px 0", overflow: "hidden", opacity: 0 }}>
+        <motion.div
+          initial="hidden" whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeUp}
+          style={{ padding: "20px 0", overflow: "hidden" }}
+        >
           <MarqueeStrip images={about.photos} />
-        </div>
+        </motion.div>
       )}
 
-      {/* ── ABOUT SNIPPET ───────────────────────────────── */}
+      {/* ── ABOUT SNIPPET ─────────────────────────────────── */}
       {about && (
-        <section
-          ref={aboutRef}
-          className="gsap-reveal"
+        <motion.section
+          initial="hidden" whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={fadeUp}
           style={{
-            padding: "4rem 2.5rem",
-            maxWidth: "72rem",
-            margin: "0 auto",
-            opacity: 0,
+            padding: "clamp(48px,7vw,96px) clamp(24px,5vw,80px)",
+            maxWidth: "1100px", margin: "0 auto",
           }}
         >
           <p style={{
             fontFamily: "'Space Mono', monospace",
-            fontSize: "0.68rem",
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            color: "var(--warm)",
-            marginBottom: "12px",
+            fontSize: "0.65rem", letterSpacing: "0.16em",
+            textTransform: "uppercase", color: "var(--warm)",
+            marginBottom: "16px",
           }}>
             A tiny mountain village where it all began...
           </p>
           <p style={{
             fontFamily: "'Playfair Display', serif",
-            fontSize: "clamp(1.1rem, 2vw, 1.35rem)",
-            lineHeight: 1.75,
-            color: "var(--fg-muted)",
-            maxWidth: "600px",
+            fontSize: "clamp(1.1rem, 2.2vw, 1.5rem)",
+            lineHeight: 1.8, color: "var(--fg-60)",
+            maxWidth: "640px",
           }}>
             {about.bio?.split("\n")[0]}
           </p>
-        </section>
+        </motion.section>
       )}
 
-      {/* ── FEATURED PROJECTS ───────────────────────────── */}
-      <section
-        ref={projectsRef}
-        className="gsap-reveal"
-        style={{
-          padding: "2rem 2.5rem 6rem",
-          maxWidth: "72rem",
-          margin: "0 auto",
-          opacity: 0,
-        }}
-      >
-        {projLoading ? (
+      {/* ── PROJECTS ──────────────────────────────────────── */}
+      <section style={{
+        padding: "0 clamp(24px,5vw,80px) clamp(80px,10vw,140px)",
+        maxWidth: "1100px", margin: "0 auto",
+      }}>
+        {loading && (
           <p style={{
             fontFamily: "'Space Mono', monospace",
-            fontSize: "0.72rem",
-            color: "var(--fg-muted)",
-          }}>
-            Loading...
-          </p>
-        ) : projError ? (
-          <p style={{ color: "red", fontSize: "0.875rem" }}>
+            fontSize: "0.68rem", color: "var(--fg-40)",
+          }}>Loading...</p>
+        )}
+        {error && (
+          <p style={{ color: "red", fontSize: "0.85rem" }}>
             Failed to load projects
           </p>
-        ) : (
-          featured.map((project) => (
-            <ProjectCard key={project._id} project={project} />
-          ))
         )}
+        {!loading && featured.map((project, i) => (
+          <ProjectCard key={project._id} project={project} index={i} />
+        ))}
       </section>
-    </main>
+    </div>
   );
 }

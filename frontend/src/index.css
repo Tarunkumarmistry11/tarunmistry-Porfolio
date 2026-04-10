@@ -8,8 +8,6 @@
   --color-cream: #f5f0eb;
   --color-charcoal: #1a1a1a;
   --color-warm: #c8b89a;
-  --animate-marquee: marquee 30s linear infinite;
-  --animate-marquee-slow: marquee 50s linear infinite;
 }
 
 @keyframes marquee {
@@ -17,24 +15,29 @@
   100% { transform: translateX(-50%); }
 }
 
-/* ── CSS custom properties for theming ───────────────────── */
+/* ── Theme tokens ─────────────────────────────────────────── */
 :root {
-  --bg: #f5f0eb;
-  --fg: #1a1a1a;
-  --fg-muted: rgba(26, 26, 26, 0.5);
-  --warm: #c8b89a;
+  --bg:       #f5f0eb;
+  --fg:       #1a1a1a;
+  --fg-60:    rgba(26,26,26,0.6);
+  --fg-40:    rgba(26,26,26,0.4);
+  --fg-20:    rgba(26,26,26,0.2);
+  --warm:     #c8b89a;
+  --nav-bg:   rgba(245,240,235,0.88);
 }
 
 [data-theme="dark"] {
-  --bg: #1a1a1a;
-  --fg: #f5f0eb;
-  --fg-muted: rgba(245, 240, 235, 0.5);
+  --bg:       #111111;
+  --fg:       #f0ebe4;
+  --fg-60:    rgba(240,235,228,0.6);
+  --fg-40:    rgba(240,235,228,0.4);
+  --fg-20:    rgba(240,235,228,0.2);
+  --nav-bg:   rgba(17,17,17,0.88);
 }
 
-/* ── Base ─────────────────────────────────────────────────── */
+/* ── Reset ────────────────────────────────────────────────── */
 *, *::before, *::after {
-  margin: 0;
-  padding: 0;
+  margin: 0; padding: 0;
   box-sizing: border-box;
 }
 
@@ -45,116 +48,110 @@ body {
   color: var(--fg);
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
-  transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-              color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
-::selection {
-  background: var(--fg);
-  color: var(--bg);
-}
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; }
+img { display: block; max-width: 100%; }
 
-::-webkit-scrollbar { width: 4px; }
+::selection { background: var(--fg); color: var(--bg); }
+
+::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--fg); }
+::-webkit-scrollbar-thumb { background: var(--fg-40); }
 
 /* ── Nav link ─────────────────────────────────────────────── */
 .nav-link {
   font-family: 'Space Mono', monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   position: relative;
-  text-decoration: none;
   color: var(--fg);
+  text-decoration: none;
 }
 .nav-link::after {
   content: '';
   position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 1px;
+  bottom: -2px; left: 0;
+  width: 0; height: 1px;
   background: var(--fg);
-  transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: width 0.4s cubic-bezier(0.16,1,0.3,1);
 }
 .nav-link:hover::after { width: 100%; }
 
 /* ── Aperture button ──────────────────────────────────────── */
 .aperture-btn {
-  background: none;
-  border: none;
+  background: none; border: none; padding: 0;
   cursor: pointer;
-  padding: 0;
   font-family: 'Space Mono', monospace;
-  font-size: 9px;
-  line-height: 1.4;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  font-size: 8.5px; line-height: 1.5;
+  display: flex; flex-direction: column; align-items: center;
   color: var(--fg);
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease;
+  letter-spacing: 0.05em;
 }
-.aperture-btn:hover { opacity: 0.45; }
-.aperture-btn .warm { color: var(--warm); }
+.aperture-btn:hover { opacity: 0.4; }
+.aperture-warm { color: var(--warm); }
 
-/* ── Hero word clip ───────────────────────────────────────── */
+/* ── HERO — the clip trick ────────────────────────────────── */
+/*
+  Each .hero-line clips its overflow.
+  The .hero-word starts at yPercent(105) via GSAP
+  so it's fully hidden below the clip edge.
+  GSAP animates it to yPercent(0) — slides up into view.
+*/
 .hero-line {
-  overflow: hidden;
   display: block;
+  overflow: hidden;
+  line-height: 0.88;
+  margin-bottom: 0.04em;
 }
+
 .hero-word {
   display: block;
-  will-change: transform;
-}
-
-/* ── Scroll reveal (fallback if GSAP fails) ───────────────── */
-.gsap-reveal {
-  will-change: transform, opacity;
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  color: var(--fg);
+  /* GSAP controls transform/opacity — do NOT set here */
 }
 
 /* ── Image hover ──────────────────────────────────────────── */
-.img-hover {
-  overflow: hidden;
-  display: block;
-}
+.img-hover { overflow: hidden; display: block; position: relative; }
 .img-hover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 0.6s ease;
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 1s cubic-bezier(0.16,1,0.3,1),
+              filter 0.7s ease;
   will-change: transform;
 }
-.img-hover:hover img {
-  transform: scale(1.06);
-}
+.img-hover:hover img { transform: scale(1.06); }
 
 /* ── Marquee ──────────────────────────────────────────────── */
-.marquee-strip { overflow: hidden; width: 100%; }
+.marquee-root { overflow: hidden; width: 100%; }
+
 .marquee-track {
   display: flex;
   gap: 12px;
   width: max-content;
-  white-space: nowrap;
 }
-.marquee-track.speed-normal { animation: marquee 30s linear infinite; }
-.marquee-track.speed-slow   { animation: marquee 50s linear infinite; }
-.marquee-strip:hover .marquee-track { animation-play-state: paused; }
+.marquee-track--normal { animation: marquee 28s linear infinite; }
+.marquee-track--slow   { animation: marquee 55s linear infinite; }
+.marquee-root:hover .marquee-track { animation-play-state: paused; }
 
-/* ── Page wrapper ─────────────────────────────────────────── */
-.page-root {
-  background-color: var(--bg);
-  color: var(--fg);
-  min-height: 100vh;
-  transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+/* ── Footer ───────────────────────────────────────────────── */
+.footer-root {
+  background-color: var(--fg);
+  color: var(--bg);
 }
 
-/* ── Mobile helpers ───────────────────────────────────────── */
+/* ── Responsive nav ───────────────────────────────────────── */
+.nav-desktop { display: flex; }
+.nav-mobile-btn { display: none; }
+
 @media (max-width: 768px) {
-  .desktop-only { display: none !important; }
-  .mobile-only  { display: flex !important; }
-}
-@media (min-width: 769px) {
-  .mobile-only  { display: none !important; }
+  .nav-desktop    { display: none !important; }
+  .nav-mobile-btn { display: block !important; }
 }
