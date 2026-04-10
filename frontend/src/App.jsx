@@ -6,6 +6,7 @@ import Stills from "../pages/Stills";
 import Motion from "../pages/Motion";
 import About from "../pages/About";
 
+
 export default function App() {
   return (
     <BrowserRouter>

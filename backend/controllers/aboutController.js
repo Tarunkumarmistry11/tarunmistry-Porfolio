@@ -1,26 +1,15 @@
 const About = require("../models/About");
 
-// Custom error helper (optional but recommended)
-const createError = (message, statusCode) => {
-  const err = new Error(message);
-  err.statusCode = statusCode;
-  return err;
-};
-
 const getAbout = async (req, res, next) => {
   try {
-    const about = await About.findOne().lean();
-
+    const about = await About.findOne();
     if (!about) {
-      return next(createError("About content not found", 404));
+      res.status(404);
+      throw new Error("About content not found");
     }
-
-    return res.status(200).json({
-      success: true,
-      data: about,
-    });
-  } catch (error) {
-    next(error);
+    res.json(about);
+  } catch (err) {
+    next(err);
   }
 };
 

@@ -1,8 +1,17 @@
+import { useDarkMode } from "../hooks/useDarkMode";
+
 export default function ApertureDisplay({ className = "" }) {
+  const { isDark, toggle } = useDarkMode();
+
   return (
-    <div className={`flex flex-col items-center font-mono text-[9px] leading-tight ${className}`}>
-      <span>F/24</span>
-      <span className="text-warm">F/1.4</span>
-    </div>
+    <button
+      onClick={toggle}
+      className={`aperture-btn ${className}`}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      title={isDark ? "Light mode" : "Dark mode"}
+    >
+      <span>{isDark ? "F/23" : "F/24"}</span>
+      <span className="warm">F/1.4</span>
+    </button>
   );
 }

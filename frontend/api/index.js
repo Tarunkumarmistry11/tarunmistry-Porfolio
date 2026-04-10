@@ -1,20 +1,11 @@
-/**
- * BASE URL (SAFE)
- */
 const BASE_URL =
   typeof import.meta.env.VITE_API_URL === "string" &&
   import.meta.env.VITE_API_URL.trim() !== ""
     ? import.meta.env.VITE_API_URL
     : "http://localhost:5000/api";
 
-/**
- * TIMEOUT CONFIG
- */
-const TIMEOUT = 10000; // 10 seconds
+const TIMEOUT = 10000;
 
-/**
- * CORE REQUEST FUNCTION
- */
 const request = async (endpoint, options = {}) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT);
@@ -33,20 +24,25 @@ const request = async (endpoint, options = {}) => {
 
     clearTimeout(timeoutId);
 
-    let data;
+    let result;
     try {
-      data = await response.json();
+      result = await response.json();
     } catch {
-      data = null;
+      result = null;
     }
 
     if (!response.ok) {
       throw new Error(
-        data?.message || `Request failed with status ${response.status}`
+        result?.message || `Request failed with status ${response.status}`
       );
     }
 
-    return data;
+    // ── Handle both wrapped { success, data } and raw array/object responses
+    if (result && typeof result === "object" && "data" in result) {
+      return result.data;
+    }
+
+    return result;
   } catch (error) {
     if (error.name === "AbortError") {
       throw new Error("Request timed out");
@@ -55,24 +51,15 @@ const request = async (endpoint, options = {}) => {
   }
 };
 
-/**
- * QUERY BUILDER
- */
 const buildQuery = (params) => {
   const query = new URLSearchParams(params).toString();
   return query ? `?${query}` : "";
 };
 
-/**
- * API FUNCTIONS
- */
-
 export const fetchProjects = async (type) => {
   const params =
     typeof type === "string" && type.trim() !== "" ? { type } : {};
-
   const query = buildQuery(params);
-
   return request(`/projects${query}`);
 };
 
@@ -80,10 +67,7 @@ export const fetchProjectBySlug = async (slug) => {
   if (!slug || typeof slug !== "string") {
     throw new Error("Invalid slug provided");
   }
-
-  const encodedSlug = encodeURIComponent(slug);
-
-  return request(`/projects/${encodedSlug}`);
+  return request(`/projects/${encodeURIComponent(slug)}`);
 };
 
 export const fetchFeaturedProjects = async () => {

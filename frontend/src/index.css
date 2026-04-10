@@ -1,64 +1,160 @@
+@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Mono:wght@400;700&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  --font-family-sans: 'Inter', sans-serif;
+  --font-family-serif: 'Playfair Display', serif;
+  --font-family-mono: 'Space Mono', monospace;
+  --color-cream: #f5f0eb;
+  --color-charcoal: #1a1a1a;
+  --color-warm: #c8b89a;
+  --animate-marquee: marquee 30s linear infinite;
+  --animate-marquee-slow: marquee 50s linear infinite;
+}
 
-/* RESET */
-* {
+@keyframes marquee {
+  0%   { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── CSS custom properties for theming ───────────────────── */
+:root {
+  --bg: #f5f0eb;
+  --fg: #1a1a1a;
+  --fg-muted: rgba(26, 26, 26, 0.5);
+  --warm: #c8b89a;
+}
+
+[data-theme="dark"] {
+  --bg: #1a1a1a;
+  --fg: #f5f0eb;
+  --fg-muted: rgba(245, 240, 235, 0.5);
+}
+
+/* ── Base ─────────────────────────────────────────────────── */
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* GLOBAL */
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
 body {
-  background-color: #f5f0eb;
-  color: #1a1a1a;
+  background-color: var(--bg);
+  color: var(--fg);
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
+  transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* SELECTION */
 ::selection {
-  background: #1a1a1a;
-  color: #f5f0eb;
+  background: var(--fg);
+  color: var(--bg);
 }
 
-/* SCROLLBAR */
 ::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #f5f0eb; }
-::-webkit-scrollbar-thumb { background: #1a1a1a; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--fg); }
 
-/* NAV LINK */
+/* ── Nav link ─────────────────────────────────────────────── */
 .nav-link {
   font-family: 'Space Mono', monospace;
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   position: relative;
+  text-decoration: none;
+  color: var(--fg);
 }
-
 .nav-link::after {
   content: '';
   position: absolute;
-  bottom: 0;
+  bottom: -2px;
   left: 0;
   width: 0;
   height: 1px;
-  background: #1a1a1a;
-  transition: width 0.3s;
+  background: var(--fg);
+  transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nav-link:hover::after { width: 100%; }
+
+/* ── Aperture button ──────────────────────────────────────── */
+.aperture-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--fg);
+  transition: opacity 0.3s ease;
+}
+.aperture-btn:hover { opacity: 0.45; }
+.aperture-btn .warm { color: var(--warm); }
+
+/* ── Hero word clip ───────────────────────────────────────── */
+.hero-line {
+  overflow: hidden;
+  display: block;
+}
+.hero-word {
+  display: block;
+  will-change: transform;
 }
 
-.nav-link:hover::after {
+/* ── Scroll reveal (fallback if GSAP fails) ───────────────── */
+.gsap-reveal {
+  will-change: transform, opacity;
+}
+
+/* ── Image hover ──────────────────────────────────────────── */
+.img-hover {
+  overflow: hidden;
+  display: block;
+}
+.img-hover img {
   width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.6s ease;
+  will-change: transform;
+}
+.img-hover:hover img {
+  transform: scale(1.06);
 }
 
-/* PAGE TRANSITION */
-.page-transition {
-  animation: fadeUp 0.7s ease forwards;
+/* ── Marquee ──────────────────────────────────────────────── */
+.marquee-strip { overflow: hidden; width: 100%; }
+.marquee-track {
+  display: flex;
+  gap: 12px;
+  width: max-content;
+  white-space: nowrap;
+}
+.marquee-track.speed-normal { animation: marquee 30s linear infinite; }
+.marquee-track.speed-slow   { animation: marquee 50s linear infinite; }
+.marquee-strip:hover .marquee-track { animation-play-state: paused; }
+
+/* ── Page wrapper ─────────────────────────────────────────── */
+.page-root {
+  background-color: var(--bg);
+  color: var(--fg);
+  min-height: 100vh;
+  transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Mobile helpers ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+  .mobile-only  { display: flex !important; }
+}
+@media (min-width: 769px) {
+  .mobile-only  { display: none !important; }
 }
