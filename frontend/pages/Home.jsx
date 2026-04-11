@@ -55,7 +55,7 @@ export default function Home() {
     return () => tl.kill();
   }, []);
 
-  // Reel modal ESC + scroll lock
+  // Reel modal
   useEffect(() => {
     if (!reel) return;
     const fn = (e) => {
@@ -71,20 +71,18 @@ export default function Home() {
 
   return (
     <div style={{ background: "var(--bg)", color: "var(--fg)", minHeight: "100vh" }}>
-      {/* HERO SECTION - VIDEO BACKGROUND with space from Navbar */}
+      {/* HERO SECTION - VIDEO BACKGROUND */}
       <section
         style={{
           position: "relative",
           height: "100vh",
-          minHeight: "100vh",
           overflow: "hidden",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          paddingTop: "90px",           // ← Added space from fixed Navbar
+          paddingTop: "90px",
         }}
       >
-        {/* Background Video */}
         <video
           src={REEL}
           autoPlay
@@ -101,7 +99,6 @@ export default function Home() {
           }}
         />
 
-        {/* Dark Overlay */}
         <div
           style={{
             position: "absolute",
@@ -111,7 +108,6 @@ export default function Home() {
           }}
         />
 
-        {/* Hero Text - On top of video */}
         <div
           style={{
             position: "relative",
@@ -124,10 +120,7 @@ export default function Home() {
           {HERO_WORDS.map((word, i) => (
             <div
               key={i}
-              style={{
-                overflow: "hidden",
-                marginBottom: word === "&" ? "0.08em" : "0.04em",
-              }}
+              style={{ overflow: "hidden", marginBottom: word === "&" ? "0.08em" : "0.04em" }}
             >
               <span
                 ref={(el) => (wRefs.current[i] = el)}
@@ -194,6 +187,9 @@ export default function Home() {
         </motion.div>
       )}
 
+      {/* DOLOMITES SECTION - Large text with inline images */}
+      <DolomitesSection />
+
       {/* MARQUEE */}
       {about?.photos?.length > 0 && (
         <motion.div
@@ -207,49 +203,10 @@ export default function Home() {
         </motion.div>
       )}
 
-      {/* ABOUT SNIPPET */}
-      {about && (
-        <motion.section
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          variants={FU}
-          style={{
-            padding: "clamp(48px,7vw,96px) clamp(20px,5vw,80px)",
-            maxWidth: "1100px",
-            margin: "0 auto",
-          }}
-        >
-          <p
-            style={{
-              fontFamily: "'Space Mono', monospace",
-              fontSize: "0.62rem",
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "var(--warm)",
-              marginBottom: "16px",
-            }}
-          >
-            A tiny mountain village where it all began...
-          </p>
-          <p
-            style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: "clamp(1.05rem, 2.2vw, 1.45rem)",
-              lineHeight: 1.82,
-              color: "var(--fg60)",
-              maxWidth: "620px",
-            }}
-          >
-            {about.bio?.split("\n")[0]}
-          </p>
-        </motion.section>
-      )}
-
       {/* PROJECTS SECTION */}
       <section
         style={{
-          padding: "0 clamp(20px,5vw,80px) clamp(80px,10vw,140px)",
+          padding: "clamp(40px,6vw,80px) clamp(20px,5vw,80px) clamp(80px,10vw,140px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
@@ -263,5 +220,167 @@ export default function Home() {
           ))}
       </section>
     </div>
+  );
+}
+
+// ── DOLOMITES SECTION ──────────────────────────────────────
+function DolomitesSection() {
+  return (
+    <section
+      style={{
+        background: "#0a0a0a",
+        color: "#fff",
+        padding: "clamp(100px, 12vh, 160px) clamp(20px, 5vw, 60px)",
+        textAlign: "center",
+      }}
+    >
+      <div style={{ maxWidth: "940px", margin: "0 auto" }}>
+        {/* Large text with inline images */}
+        <div
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: "clamp(2.8rem, 7.5vw, 6.2rem)",
+            lineHeight: 1.05,
+            fontWeight: 400,
+            marginBottom: "clamp(40px, 7vh, 80px)",
+          }}
+        >
+          A{" "}
+          <InlineImage 
+            src="https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61e939dee9c133675fbab858_Photo%20-%20Dolomites%20-%201.jpg" 
+            tilt="left" 
+          />
+          {" "}tiny mountain village{" "}
+          <InlineImage 
+            src="https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61e939de8821f377935af4c3_Photo%20-%20Dolomites%20-%202.jpg" 
+            tilt="right" 
+          />
+          {" "}where it all began...
+          <InlineImage 
+            src="https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61e939de360c7c91700e9743_Photo%20-%20Dolomites%20-%203.jpg" 
+            tilt="left" 
+          />
+        </div>
+
+        {/* Bio text */}
+        <p
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: "clamp(1rem, 1.8vw, 1.15rem)",
+            lineHeight: 1.85,
+            color: "#ddd",
+            maxWidth: "680px",
+            margin: "0 auto 60px",
+          }}
+        >
+          Tarun Mistry (@giuligartner) is an outdoor, travel, and commercial photographer,
+          filmmaker, and storyteller from the Dolomites in northern Italy. His work focuses on
+          capturing wild and rugged landscapes with a vivid color palette and dreamy elements.
+          His love for photography has spilled over into filmmaking which is one of the main
+          creative outlets he pursues today.
+        </p>
+
+        {/* READ MY STORY Button */}
+        <a
+          href="/about"
+          style={{
+            fontFamily: "'Space Mono', monospace",
+            fontSize: "0.68rem",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            color: "#fff",
+            border: "1px solid #fff",
+            padding: "14px 36px",
+            borderRadius: "9999px",
+            textDecoration: "none",
+            display: "inline-block",
+            transition: "all 0.35s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#fff";
+            e.currentTarget.style.color = "#000";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+            e.currentTarget.style.color = "#fff";
+          }}
+        >
+          READ MY STORY
+        </a>
+      </div>
+    </section>
+  );
+}
+
+function InlineImage({ src, tilt }) {
+  const ref = useRef(null);
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    // Scroll reveal
+    gsap.fromTo(
+      el,
+      { opacity: 0, scale: 0.7, y: 20 },
+      {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        duration: 1.1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: el,
+          start: "top 85%",
+          once: true,
+        },
+      }
+    );
+  }, []);
+
+  // Hover animation with tilt
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    if (isHovered) {
+      const rotation = tilt === "left" ? -12 : 12;
+      gsap.to(el, {
+        scale: 1.18,
+        rotation: rotation,
+        duration: 0.6,
+        ease: "power2.out",
+      });
+    } else {
+      gsap.to(el, {
+        scale: 1,
+        rotation: 0,
+        duration: 0.5,
+        ease: "power2.out",
+      });
+    }
+  }, [isHovered, tilt]);
+
+  return (
+    <img
+      ref={ref}
+      src={src}
+      alt=""
+      style={{
+        display: "inline-block",
+        verticalAlign: "middle",
+        width: "clamp(58px, 7vw, 82px)",
+        height: "clamp(58px, 7vw, 82px)",
+        objectFit: "cover",
+        borderRadius: "8px",
+        margin: "0 10px",
+        boxShadow: "0 6px 25px rgba(0,0,0,0.5)",
+        cursor: "pointer",
+        transition: "box-shadow 0.3s ease",
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    />
   );
 }
