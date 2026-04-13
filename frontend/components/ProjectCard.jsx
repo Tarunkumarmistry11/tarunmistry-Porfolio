@@ -1,84 +1,200 @@
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import ColorPalette from "./ColorPalette";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-const imgV = {
-  hidden:   { opacity:0, scale:1.07, y:30 },
-  visible: (i) => ({
-    opacity:1, scale:1, y:0,
-    transition:{ duration:1.4, ease:[0.16,1,0.3,1], delay: i * 0.13 },
-  }),
-};
-
-const metaV = {
-  hidden:  { opacity:0, y:22 },
-  visible: { opacity:1, y:0,
-    transition:{ duration:0.9, ease:[0.16,1,0.3,1], delay:0.25 } },
-};
+gsap.registerPlugin(ScrollTrigger);
 
 export default function ProjectCard({ project }) {
-  const { title, slug, type, date, location,
-          coverImageLeft, coverImageRight, colorPalette } = project;
+  const { title, slug, type, date, location, coverImageLeft, coverImageRight } = project;
+
+  const containerRef = useRef(null);
+  const leftRef = useRef(null);
+  const rightRef = useRef(null);
+  const centerRef = useRef(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const left = leftRef.current;
+    const right = rightRef.current;
+    const center = centerRef.current;
+
+    if (!container || !left || !right || !center) return;
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: container,
+        start: "top 65%",
+        end: "bottom 35%",
+        scrub: 1.1,           // Smooth cinematic feel
+        // pin: true,         // Uncomment if you want it to pin during scroll
+      },
+    });
+
+    // Left image → slides LEFT + slight scale down + fade
+    tl.to(left, {
+      x: "-85%",
+      scale: 0.92,
+      opacity: 0.75,
+      ease: "none",
+    }, 0);
+
+    // Right image → slides RIGHT + slight scale down + fade
+    tl.to(right, {
+      x: "85%",
+      scale: 0.92,
+      opacity: 0.75,
+      ease: "none",
+    }, 0);
+
+    // Center panel → stays stable, fades in gently
+    tl.fromTo(
+      center,
+      { opacity: 0, scale: 0.96, y: 30 },
+      {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        ease: "power2.out",
+      },
+      0.1
+    );
+
+    return () => tl.kill();
+  }, []);
 
   return (
-    <motion.div
-      initial="hidden" whileInView="visible"
-      viewport={{ once:true, amount:0.1 }}
-      style={{ marginBottom:"clamp(60px,10vw,120px)" }}
+    <div
+      ref={containerRef}
+      style={{
+        position: "relative",
+        height: "680px",
+        marginBottom: "clamp(100px, 12vw, 160px)",
+        overflow: "hidden",
+        borderRadius: "20px",
+      }}
     >
-      {/* Images */}
-      <div style={{
-        display:"grid",
-        gridTemplateColumns: coverImageRight ? "1fr 1fr" : "1fr",
-        gap:"10px", marginBottom:"20px",
-      }}>
-        <motion.div custom={0} variants={imgV}
-          className="img-hover" style={{ aspectRatio:"4/5" }}>
-          <img src={coverImageLeft} alt={title} />
-        </motion.div>
-        {coverImageRight && (
-          <motion.div custom={1} variants={imgV}
-            className="img-hover" style={{ aspectRatio:"4/5" }}>
-            <img src={coverImageRight} alt={title} />
-          </motion.div>
-        )}
+      {/* LEFT IMAGE */}
+      <div
+        ref={leftRef}
+        style={{
+          position: "absolute",
+          left: "0",
+          top: "0",
+          width: "52%",
+          height: "100%",
+          overflow: "hidden",
+        }}
+      >
+        <img
+          src={coverImageLeft}
+          alt={title}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            borderTopLeftRadius: "20px",
+            borderBottomLeftRadius: "20px",
+          }}
+        />
       </div>
 
-      {/* Meta */}
-      <motion.div variants={metaV} style={{
-        display:"flex", alignItems:"flex-start",
-        justifyContent:"space-between", flexWrap:"wrap", gap:"16px",
-      }}>
-        <div>
-          <p style={{
-            fontFamily:"'Space Mono', monospace",
-            fontSize:"0.6rem", letterSpacing:"0.16em",
-            textTransform:"uppercase", color:"var(--fg40)",
-            marginBottom:"6px",
-          }}>{date} — {location}</p>
-          <h3 style={{
-            fontFamily:"'Playfair Display', serif",
-            fontSize:"clamp(1.6rem,3.5vw,2.6rem)",
-            fontWeight:400, color:"var(--fg)", lineHeight:1.1,
-          }}>{title}</h3>
-          {colorPalette?.length > 0 && <ColorPalette colors={colorPalette} />}
-        </div>
-
-        <Link to={`/${type}/${slug}`}
+      {/* RIGHT IMAGE */}
+      <div
+        ref={rightRef}
+        style={{
+          position: "absolute",
+          right: "0",
+          top: "0",
+          width: "52%",
+          height: "100%",
+          overflow: "hidden",
+        }}
+      >
+        <img
+          src={coverImageRight}
+          alt={title}
           style={{
-            fontFamily:"'Space Mono', monospace",
-            fontSize:"0.6rem", letterSpacing:"0.12em",
-            textTransform:"uppercase",
-            border:"1px solid var(--fg)",
-            padding:"10px 18px", color:"var(--fg)",
-            alignSelf:"flex-start", marginTop:"6px",
-            transition:"background 0.3s, color 0.3s",
-            display:"inline-block",
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            borderTopRightRadius: "20px",
+            borderBottomRightRadius: "20px",
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.background="var(--fg)"; e.currentTarget.style.color="var(--bg)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background="transparent"; e.currentTarget.style.color="var(--fg)"; }}
-        >See case study</Link>
-      </motion.div>
-    </motion.div>
+        />
+      </div>
+
+      {/* CENTER CONTENT PANEL */}
+      <div
+        ref={centerRef}
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "380px",
+          background: "#0a0a0a",
+          color: "#fff",
+          padding: "52px 40px",
+          textAlign: "center",
+          borderRadius: "16px",
+          zIndex: 10,
+          boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+          opacity: 0,
+        }}
+      >
+        <p
+          style={{
+            fontFamily: "'Space Mono', monospace",
+            fontSize: "0.72rem",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "#999",
+            marginBottom: "16px",
+          }}
+        >
+          {date} → {location}
+        </p>
+
+        <h2
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: "clamp(2.4rem, 4.2vw, 3.4rem)",
+            fontWeight: 400,
+            lineHeight: 1.05,
+            marginBottom: "36px",
+          }}
+        >
+          {title}
+        </h2>
+
+        <Link
+          to={`/${type}/${slug}`}
+          style={{
+            fontFamily: "'Space Mono', monospace",
+            fontSize: "0.68rem",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            border: "1px solid #fff",
+            padding: "14px 32px",
+            color: "#fff",
+            textDecoration: "none",
+            borderRadius: "9999px",
+            display: "inline-block",
+            transition: "all 0.3s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#fff";
+            e.currentTarget.style.color = "#000";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+            e.currentTarget.style.color = "#fff";
+          }}
+        >
+          SEE CASE STUDY
+        </Link>
+      </div>
+    </div>
   );
 }

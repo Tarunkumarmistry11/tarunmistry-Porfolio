@@ -7,6 +7,7 @@ import { getFeaturedProjects } from "../features/projects/projectsSlice";
 import { getAbout } from "../features/about/aboutSlice";
 import ProjectCard from "../components/ProjectCard";
 import MarqueeStrip from "../components/MarqueeStrip";
+import HorizontalRevealImage from "../components/HorizontalRevealImage";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -70,7 +71,13 @@ export default function Home() {
   }, [reel]);
 
   return (
-    <div style={{ background: "var(--bg)", color: "var(--fg)", minHeight: "100vh" }}>
+    <div
+      style={{
+        background: "var(--bg)",
+        color: "var(--fg)",
+        minHeight: "100vh",
+      }}
+    >
       {/* HERO SECTION - VIDEO BACKGROUND */}
       <section
         style={{
@@ -120,7 +127,10 @@ export default function Home() {
           {HERO_WORDS.map((word, i) => (
             <div
               key={i}
-              style={{ overflow: "hidden", marginBottom: word === "&" ? "0.08em" : "0.04em" }}
+              style={{
+                overflow: "hidden",
+                marginBottom: word === "&" ? "0.08em" : "0.04em",
+              }}
             >
               <span
                 ref={(el) => (wRefs.current[i] = el)}
@@ -187,7 +197,7 @@ export default function Home() {
         </motion.div>
       )}
 
-      {/* DOLOMITES SECTION - Large text with inline images */}
+      {/* DOLOMITES SECTION - Inline images inside text */}
       <DolomitesSection />
 
       {/* MARQUEE */}
@@ -206,7 +216,8 @@ export default function Home() {
       {/* PROJECTS SECTION */}
       <section
         style={{
-          padding: "clamp(40px,6vw,80px) clamp(20px,5vw,80px) clamp(80px,10vw,140px)",
+          padding:
+            "clamp(40px,6vw,80px) clamp(20px,5vw,80px) clamp(80px,10vw,140px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
@@ -224,18 +235,19 @@ export default function Home() {
 }
 
 // ── DOLOMITES SECTION ──────────────────────────────────────
+
 function DolomitesSection() {
   return (
     <section
       style={{
-        background: "#0a0a0a",
-        color: "#fff",
+        background: "var(--bg)",
+        color: "#var(--fg)",
         padding: "clamp(100px, 12vh, 160px) clamp(20px, 5vw, 60px)",
         textAlign: "center",
       }}
     >
       <div style={{ maxWidth: "940px", margin: "0 auto" }}>
-        {/* Large text with inline images */}
+        {/* Large flowing text with inline images */}
         <div
           style={{
             fontFamily: "'Playfair Display', serif",
@@ -246,19 +258,19 @@ function DolomitesSection() {
           }}
         >
           A{" "}
-          <InlineImage 
-            src="https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61e939dee9c133675fbab858_Photo%20-%20Dolomites%20-%201.jpg" 
-            tilt="left" 
-          />
-          {" "}tiny mountain village{" "}
-          <InlineImage 
-            src="https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61e939de8821f377935af4c3_Photo%20-%20Dolomites%20-%202.jpg" 
-            tilt="right" 
-          />
-          {" "}where it all began...
-          <InlineImage 
-            src="https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61e939de360c7c91700e9743_Photo%20-%20Dolomites%20-%203.jpg" 
-            tilt="left" 
+          <InlineImage
+            src="https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61e939dee9c133675fbab858_Photo%20-%20Dolomites%20-%201.jpg"
+            tilt="left"
+          />{" "}
+          tiny mountain village{" "}
+          <InlineImage
+            src="https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61e939de8821f377935af4c3_Photo%20-%20Dolomites%20-%202.jpg"
+            tilt="right"
+          />{" "}
+          where it all began...
+          <InlineImage
+            src="https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61e939de360c7c91700e9743_Photo%20-%20Dolomites%20-%203.jpg"
+            tilt="left"
           />
         </div>
 
@@ -268,16 +280,17 @@ function DolomitesSection() {
             fontFamily: "'Playfair Display', serif",
             fontSize: "clamp(1rem, 1.8vw, 1.15rem)",
             lineHeight: 1.85,
-            color: "#ddd",
+            color: "#var(--fg)",
             maxWidth: "680px",
             margin: "0 auto 60px",
           }}
         >
-          Tarun Mistry (@giuligartner) is an outdoor, travel, and commercial photographer,
-          filmmaker, and storyteller from the Dolomites in northern Italy. His work focuses on
-          capturing wild and rugged landscapes with a vivid color palette and dreamy elements.
-          His love for photography has spilled over into filmmaking which is one of the main
-          creative outlets he pursues today.
+          Tarun Mistry (@giuligartner) is an outdoor, travel, and commercial
+          photographer, filmmaker, and storyteller from the Dolomites in
+          northern Italy. His work focuses on capturing wild and rugged
+          landscapes with a vivid color palette and dreamy elements. His love
+          for photography has spilled over into filmmaking which is one of the
+          main creative outlets he pursues today.
         </p>
 
         {/* READ MY STORY Button */}
@@ -288,21 +301,23 @@ function DolomitesSection() {
             fontSize: "0.68rem",
             letterSpacing: "0.12em",
             textTransform: "uppercase",
-            color: "#fff",
-            border: "1px solid #fff",
+            color: "var(--fg)",
+            border: "1px solid var(--fg)",
+            backgroundColor: "transparent",
             padding: "14px 36px",
             borderRadius: "9999px",
             textDecoration: "none",
             display: "inline-block",
             transition: "all 0.35s ease",
+            cursor: "pointer",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#fff";
-            e.currentTarget.style.color = "#000";
+            e.currentTarget.style.backgroundColor = "var(--fg)";
+            e.currentTarget.style.color = "var(--bg)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = "transparent";
-            e.currentTarget.style.color = "#fff";
+            e.currentTarget.style.color = "var(--fg)";
           }}
         >
           READ MY STORY
@@ -312,55 +327,52 @@ function DolomitesSection() {
   );
 }
 
+// ── INLINE IMAGE COMPONENT ─────────────────────────────────
 function InlineImage({ src, tilt }) {
   const ref = useRef(null);
-  const [isHovered, setIsHovered] = useState(false);
 
+  // Scroll reveal: start slightly hidden
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
 
-    // Scroll reveal
     gsap.fromTo(
       el,
-      { opacity: 0, scale: 0.7, y: 20 },
+      { opacity: 0.3, scale: 0.85, y: 15 },
       {
         opacity: 1,
         scale: 1,
         y: 0,
-        duration: 1.1,
+        duration: 1.2,
         ease: "power3.out",
         scrollTrigger: {
           trigger: el,
-          start: "top 85%",
+          start: "top 88%",
           once: true,
         },
-      }
+      },
     );
   }, []);
 
-  // Hover animation with tilt
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  // Smooth hover with alternating tilt
+  const handleMouseEnter = () => {
+    const rotation = tilt === "left" ? -14 : 14;
+    gsap.to(ref.current, {
+      scale: 2,
+      rotation: rotation,
+      duration: 0.65,
+      ease: "power2.out",
+    });
+  };
 
-    if (isHovered) {
-      const rotation = tilt === "left" ? -12 : 12;
-      gsap.to(el, {
-        scale: 1.18,
-        rotation: rotation,
-        duration: 0.6,
-        ease: "power2.out",
-      });
-    } else {
-      gsap.to(el, {
-        scale: 1,
-        rotation: 0,
-        duration: 0.5,
-        ease: "power2.out",
-      });
-    }
-  }, [isHovered, tilt]);
+  const handleMouseLeave = () => {
+    gsap.to(ref.current, {
+      scale: 1,
+      rotation: 0,
+      duration: 0.6,
+      ease: "power2.out",
+    });
+  };
 
   return (
     <img
@@ -370,17 +382,18 @@ function InlineImage({ src, tilt }) {
       style={{
         display: "inline-block",
         verticalAlign: "middle",
-        width: "clamp(58px, 7vw, 82px)",
-        height: "clamp(58px, 7vw, 82px)",
+        width: "clamp(58px, 7.2vw, 84px)",
+        height: "clamp(58px, 7.2vw, 84px)",
         objectFit: "cover",
-        borderRadius: "8px",
-        margin: "0 10px",
-        boxShadow: "0 6px 25px rgba(0,0,0,0.5)",
+        borderRadius: "10px",
+        margin: "0 12px",
+        boxShadow: "0 8px 28px rgba(0,0,0,0.55)",
         cursor: "pointer",
-        transition: "box-shadow 0.3s ease",
+        opacity: 0.3, // start slightly hidden
+        transition: "box-shadow 0.4s ease",
       }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     />
   );
 }
