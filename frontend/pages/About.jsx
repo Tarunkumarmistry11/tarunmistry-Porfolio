@@ -1,204 +1,251 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "lenis";
 import { getAbout } from "../features/about/aboutSlice";
-import MarqueeStrip from "../components/MarqueeStrip";
+
+gsap.registerPlugin(ScrollTrigger);
+
+/* -------------------- DATA -------------------- */
+
+const QUOTE =
+  "We are a product of our environment, probably more than we'd care to admit. Growing up in a small village by the mountains shaped my relationship with nature.";
+
+const PHOTO_STRIP = [
+  "https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/635e509877408d75da804c25_Parker%20Scmidt-205.jpg",
+  "https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61f7f6a452675ad591cfd1a8_photo-creative-6.jpg",
+  "https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61f7f6a498d63ab45b056cb8_photo-creative-3.jpg",
+  "https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/635e4fddb16556675ceb906f_97660031.jpg",
+  "https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61f7f6a3627fccd34acd48ef_photo-creative-2.jpg",
+  "https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61f7f6a45b40c6821923f5cd_photo-creative-7.jpg",
+];
+
+const PORTRAIT =
+  "https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/63769165d4de2442394ed214_giulia-cold.jpg";
+
+/* -------------------- COMPONENT -------------------- */
 
 export default function About() {
   const dispatch = useDispatch();
-  const { data: about, loading, error } = useSelector((s) => s.about);
-  const [hovered, setHovered] = useState(false);
+  const { data: about } = useSelector((s) => s.about);
+
+  const quoteRef = useRef(null);
+  const stripRef = useRef(null);
+
+  // Cinematic section refs
+  const sectionRef = useRef(null);
+  const textRef = useRef(null);
+  const imgRef = useRef(null);
+
+  /* -------------------- INIT -------------------- */
 
   useEffect(() => {
     dispatch(getAbout());
   }, [dispatch]);
 
-  if (loading || !about) {
-    return (
-      <main className="bg-cream min-h-screen pt-28 px-6 md:px-10">
-        <p className="font-mono text-xs tracking-widest text-charcoal/40 animate-pulse">
-          Loading...
-        </p>
-      </main>
-    );
-  }
+  // ✅ LENIS + GSAP SYNC
+  useEffect(() => {
+    const lenis = new Lenis({
+      lerp: 0.08,
+      smooth: true,
+    });
 
-  if (error) {
-    return (
-      <main className="bg-cream min-h-screen pt-28 px-6 md:px-10">
-        <p className="font-mono text-xs text-red-500">Error: {error}</p>
-      </main>
-    );
-  }
+    function raf(time) {
+      lenis.raf(time);
+      ScrollTrigger.update();
+      requestAnimationFrame(raf);
+    }
 
-  const bioParagraphs = about.bio?.split("\n").filter(Boolean) || [];
+    requestAnimationFrame(raf);
+
+    return () => lenis.destroy();
+  }, []);
+
+  /* -------------------- ANIMATIONS -------------------- */
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Quote fade
+      gsap.fromTo(
+        quoteRef.current,
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: quoteRef.current,
+            start: "top 80%",
+          },
+        }
+      );
+
+      // Horizontal scroll strip
+      gsap.to(stripRef.current, {
+        xPercent: -30,
+        ease: "none",
+        scrollTrigger: {
+          trigger: stripRef.current,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+
+      // TEXT STAGGER
+      const lines = textRef.current.querySelectorAll("p");
+
+      gsap.fromTo(
+        lines,
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.15,
+          duration: 1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 75%",
+          },
+        }
+      );
+
+      // IMAGE PARALLAX (🔥 KEY EFFECT)
+      gsap.fromTo(
+        imgRef.current,
+        { y: 100, scale: 1.1 },
+        {
+          y: -60,
+          scale: 1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          },
+        }
+      );
+    });
+
+    return () => ctx.revert();
+  }, []);
+
+  /* -------------------- DATA -------------------- */
+
+  const bio =
+    about?.bio?.split("\n").filter(Boolean) || [
+      "The unique culture and mountains shaped my creative journey.",
+      "Photography became my way of expressing emotions.",
+      "Every frame I capture tells a story.",
+    ];
+
+  /* -------------------- UI -------------------- */
 
   return (
-    <main className="bg-cream min-h-screen page-transition">
-      {/* HEADER */}
-      <section className="pt-28 px-6 md:px-10 max-w-6xl mx-auto">
-        <h1 className="font-serif text-5xl md:text-7xl mb-10">
-          Giulia Gartner
-        </h1>
-
-        {about.portraitVideo && (
-          <div className="w-full max-h-[70vh] overflow-hidden mb-12">
-            <video
-              src={about.portraitVideo}
-              autoPlay
-              muted
-              loop
-              playsInline
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
-      </section>
-
-      {/* MARQUEE */}
-      <div className="py-4 overflow-hidden">
-        <MarqueeStrip images={about.photos || []} />
-      </div>
-      <div className="py-4 overflow-hidden">
-        <MarqueeStrip
-          images={[...(about.photos || [])].reverse()}
-          speed="marquee-slow"
-        />
-      </div>
-
-      {/* BIO */}
-      <section className="px-6 md:px-10 py-20 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16">
-        <div className="space-y-5">
-          <h3 className="font-serif italic text-2xl">
-            Let's create beautiful things.
-          </h3>
-
-          {bioParagraphs.map((p, i) => (
-            <p
-              key={`${p}-${i}`}
-              className="font-sans text-base leading-relaxed text-charcoal/70"
-              dangerouslySetInnerHTML={{
-                __html: p.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>"),
-              }}
-            />
-          ))}
-        </div>
-
-        <div
-          className="relative aspect-[3/4] overflow-hidden cursor-pointer"
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          onClick={() => setHovered((v) => !v)}
+    <div
+      style={{
+        background: "#0a0a0a",
+        color: "#fff",
+        minHeight: "100vh",
+        overflowX: "hidden",
+      }}
+    >
+      {/* QUOTE */}
+      <section
+        style={{
+          padding: "clamp(80px, 12vh, 160px) 20px",
+          textAlign: "center",
+        }}
+      >
+        <p
+          ref={quoteRef}
+          style={{
+            fontSize: "clamp(1.6rem, 4vw, 2.4rem)",
+            maxWidth: "800px",
+            margin: "0 auto",
+            lineHeight: 1.5,
+          }}
         >
-          <img
-            src={about.portraitCold}
-            alt="Giulia Gartner"
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-              hovered ? "opacity-0" : "opacity-100"
-            }`}
-          />
-          <img
-            src={about.portraitWarm}
-            alt="Giulia Gartner warm"
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-              hovered ? "opacity-100" : "opacity-0"
-            }`}
-          />
-        </div>
+          {QUOTE}
+        </p>
       </section>
 
-      {/* AWARDS */}
-      <section className="px-6 md:px-10 py-12 max-w-6xl mx-auto border-t border-charcoal/10">
-        <h2 className="font-mono text-xs tracking-widest uppercase text-charcoal/40 mb-8">
-          Awards & Nominations
-        </h2>
-
-        <div className="space-y-6">
-          {about.awards?.map((award) => (
+      {/* PHOTO STRIP */}
+      <div
+        style={{
+          overflow: "hidden",
+          padding: "20px 0 60px",
+        }}
+      >
+        <div
+          ref={stripRef}
+          style={{
+            display: "flex",
+            gap: "12px",
+            width: "max-content",
+          }}
+        >
+          {[...PHOTO_STRIP, ...PHOTO_STRIP].map((src, i) => (
             <div
-              key={`${award.title}-${award.year}`}
-              className="flex flex-col md:flex-row md:items-center justify-between gap-2 py-4 border-b border-charcoal/5"
+              key={i}
+              style={{
+                width: "280px",
+                height: "360px",
+                borderRadius: "16px",
+                overflow: "hidden",
+              }}
             >
-              <h3 className="font-serif text-xl">{award.title}</h3>
-
-              <div className="flex items-center gap-4">
-                <a
-                  href={award.festivalUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-mono text-xs underline underline-offset-2 hover:no-underline"
-                >
-                  {award.festival}
-                </a>
-
-                <span className="font-mono text-xs text-charcoal/40">
-                  {award.year}
-                </span>
-              </div>
+              <img
+                src={src}
+                alt=""
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
             </div>
           ))}
         </div>
-      </section>
+      </div>
 
-      {/* PRESS */}
-      <section className="px-6 md:px-10 py-12 max-w-6xl mx-auto border-t border-charcoal/10">
-        <h2 className="font-mono text-xs tracking-widest uppercase text-charcoal/40 mb-8">
-          As seen in the press
-        </h2>
+      {/* CINEMATIC BIO (🔥 MAIN SECTION) */}
+      <section
+        ref={sectionRef}
+        style={{
+          padding: "120px 20px",
+          maxWidth: "1200px",
+          margin: "0 auto",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "80px",
+          alignItems: "center",
+        }}
+      >
+        {/* IMAGE */}
+        <div
+          ref={imgRef}
+          style={{
+            borderRadius: "20px",
+            overflow: "hidden",
+          }}
+        >
+          <img
+            src={PORTRAIT}
+            alt=""
+            style={{ width: "100%", display: "block" }}
+          />
+        </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {about.press?.map((item) => (
-            <a
-              key={item.name}
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block p-4 border border-charcoal/10 hover:border-charcoal/40 transition-colors duration-300 group"
-            >
-              <h4 className="font-serif text-lg group-hover:italic transition-all duration-300">
-                {item.name}
-              </h4>
-
-              <div className="flex gap-2 mt-1">
-                {item.formats?.map((f) => (
-                  <span
-                    key={f}
-                    className="font-mono text-[10px] text-charcoal/40 uppercase"
-                  >
-                    {f}
-                  </span>
-                ))}
-              </div>
-            </a>
+        {/* TEXT */}
+        <div ref={textRef}>
+          {bio.map((p, i) => (
+            <p key={i} style={{ marginBottom: "1.6em", lineHeight: 1.8 }}>
+              {p}
+            </p>
           ))}
         </div>
       </section>
-
-      {/* PODCASTS */}
-      <section className="px-6 md:px-10 py-12 max-w-6xl mx-auto border-t border-charcoal/10">
-        <h2 className="font-mono text-xs tracking-widest uppercase text-charcoal/40 mb-8">
-          Podcasts to listen to
-        </h2>
-
-        <div className="space-y-4">
-          {about.podcasts?.map((podcast) => (
-            <a
-              key={podcast.title}
-              href={podcast.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between py-3 border-b border-charcoal/5 group"
-            >
-              <h4 className="font-serif text-xl group-hover:italic transition-all duration-300">
-                {podcast.title}
-              </h4>
-
-              <span className="font-mono text-xs text-charcoal/30 group-hover:text-charcoal transition-colors duration-300">
-                →
-              </span>
-            </a>
-          ))}
-        </div>
-      </section>
-    </main>
+    </div>
   );
 }

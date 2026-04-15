@@ -150,11 +150,30 @@ img { display: block; max-width: 100%; }
 .marquee-track--slow   { animation: marquee 55s linear infinite; }
 .marquee-root:hover .marquee-track { animation-play-state: paused; }
 
+/* ── about - Theme-based fg variants ───────────────────────────────── */
+:root {
+  --fg10:  rgba(26,26,26,0.1);
+  --fg20:  rgba(26,26,26,0.2);
+  --fg40:  rgba(26,26,26,0.4);
+  --fg60:  rgba(26,26,26,0.6);
+  --fg05:  rgba(26,26,26,0.05);
+}
+
+[data-theme="dark"] {
+  --fg10:  rgba(240,235,228,0.1);
+  --fg20:  rgba(240,235,228,0.2);
+  --fg40:  rgba(240,235,228,0.4);
+  --fg60:  rgba(240,235,228,0.6);
+  --fg05:  rgba(240,235,228,0.05);
+}
+
 /* ── Footer ───────────────────────────────────────────────── */
 .footer-root {
   background-color: var(--fg);
   color: var(--bg);
 }
+
+
 
 /* ── Responsive nav ───────────────────────────────────────── */
 .nav-desktop { display: flex; }
