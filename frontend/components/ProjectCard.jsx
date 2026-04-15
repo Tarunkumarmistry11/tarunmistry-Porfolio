@@ -25,39 +25,40 @@ export default function ProjectCard({ project }) {
       scrollTrigger: {
         trigger: container,
         start: "top 65%",
-        end: "bottom 35%",
-        scrub: 1.1,           // Smooth cinematic feel
-        // pin: true,         // Uncomment if you want it to pin during scroll
+        end: "bottom 30%",
+        scrub: 1.2,
       },
     });
 
-    // Left image → slides LEFT + slight scale down + fade
+    // Left image: moves left + subtle counterclockwise tilt
     tl.to(left, {
-      x: "-85%",
-      scale: 0.92,
-      opacity: 0.75,
+      x: "-72%",
+      scale: 0.94,
+      opacity: 0.78,
+      rotation: -6,
       ease: "none",
     }, 0);
 
-    // Right image → slides RIGHT + slight scale down + fade
+    // Right image: moves right + subtle clockwise tilt
     tl.to(right, {
-      x: "85%",
-      scale: 0.92,
-      opacity: 0.75,
+      x: "72%",
+      scale: 0.94,
+      opacity: 0.78,
+      rotation: 6,
       ease: "none",
     }, 0);
 
-    // Center panel → stays stable, fades in gently
+    // Center panel
     tl.fromTo(
       center,
-      { opacity: 0, scale: 0.96, y: 30 },
+      { opacity: 0, scale: 0.95, y: 40 },
       {
         opacity: 1,
         scale: 1,
         y: 0,
         ease: "power2.out",
       },
-      0.1
+      0.15
     );
 
     return () => tl.kill();
@@ -68,22 +69,28 @@ export default function ProjectCard({ project }) {
       ref={containerRef}
       style={{
         position: "relative",
-        height: "680px",
+        height: "720px",
         marginBottom: "clamp(100px, 12vw, 160px)",
-        overflow: "hidden",
-        borderRadius: "20px",
+        overflow: "visible",
+        width: "100%",
+        maxWidth: "1600px",
+        marginLeft: "auto",
+        marginRight: "auto",
+        padding: "0 20px",
       }}
     >
-      {/* LEFT IMAGE */}
+      {/* LEFT IMAGE - Fully rounded corners */}
       <div
         ref={leftRef}
         style={{
           position: "absolute",
           left: "0",
           top: "0",
-          width: "52%",
+          width: "54%",
           height: "100%",
           overflow: "hidden",
+          borderRadius: "28px",           // ← Uniform rounded corners on all sides
+          transformOrigin: "center center",
         }}
       >
         <img
@@ -93,22 +100,22 @@ export default function ProjectCard({ project }) {
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            borderTopLeftRadius: "20px",
-            borderBottomLeftRadius: "20px",
           }}
         />
       </div>
 
-      {/* RIGHT IMAGE */}
+      {/* RIGHT IMAGE - Fully rounded corners */}
       <div
         ref={rightRef}
         style={{
           position: "absolute",
           right: "0",
           top: "0",
-          width: "52%",
+          width: "54%",
           height: "100%",
           overflow: "hidden",
+          borderRadius: "28px",           // ← Uniform rounded corners on all sides
+          transformOrigin: "center center",
         }}
       >
         <img
@@ -118,8 +125,6 @@ export default function ProjectCard({ project }) {
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            borderTopRightRadius: "20px",
-            borderBottomRightRadius: "20px",
           }}
         />
       </div>
@@ -132,7 +137,7 @@ export default function ProjectCard({ project }) {
           left: "50%",
           top: "50%",
           transform: "translate(-50%, -50%)",
-          width: "380px",
+          width: "400px",
           background: "#0a0a0a",
           color: "#fff",
           padding: "52px 40px",
@@ -192,7 +197,7 @@ export default function ProjectCard({ project }) {
             e.currentTarget.style.color = "#fff";
           }}
         >
-          SEE CASE STUDY
+          VISIT SHOP
         </Link>
       </div>
     </div>

@@ -3,9 +3,9 @@ import { useCopyToClipboard } from "../hooks/useCopyToClipboard";
 const EMAIL = "photo@giuligartner.com";
 
 const SOCIALS = [
-  { label: "YOUTUBE", href: "https://www.youtube.com/user/Giuligartner" },
-  { label: "INSTAGRAM", href: "https://www.instagram.com/giuligartner/" },
-  { label: "TWITTER", href: "https://twitter.com/giuligartner" },
+  { label: "YOUTUBE", href: "/" },
+  { label: "INSTAGRAM", href: "https://www.instagram.com/el3v_3n/?hl=en" },
+  { label: "TWITTER", href: "/" },
 ];
 
 export default function Footer() {
@@ -16,7 +16,7 @@ export default function Footer() {
       style={{
         background: "var(--bg)",
         color: "var(--fg)",
-        padding: "clamp(80px, 10vh, 120px) 24px 60px",
+        padding: "clamp(80px, 12vh, 140px) 20px 80px",
         textAlign: "center",
         position: "relative",
         borderTop: "1px solid var(--border)",
@@ -45,10 +45,11 @@ export default function Footer() {
             background: "transparent",
             border: "1px solid var(--fg30)",
             borderRadius: "9999px",
-            padding: "18px 48px",
-            marginBottom: "80px",
+            padding: "clamp(18px, 4vw, 22px) clamp(32px, 8vw, 48px)",
+            marginBottom: "clamp(60px, 8vh, 90px)",
             cursor: "pointer",
             transition: "all 0.3s ease",
+            maxWidth: "100%",
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.borderColor = "var(--fg)";
@@ -62,11 +63,12 @@ export default function Footer() {
           <h2
             style={{
               fontFamily: "'Playfair Display', serif",
-              fontSize: "clamp(1.8rem, 4.5vw, 3.2rem)",
+              fontSize: "clamp(1.6rem, 5.5vw, 3.2rem)",
               fontWeight: 400,
               letterSpacing: "-0.02em",
               margin: 0,
               color: "var(--fg)",
+              wordBreak: "break-all",
             }}
           >
             {EMAIL}
@@ -76,7 +78,7 @@ export default function Footer() {
               fontFamily: "'Space Mono', monospace",
               fontSize: "0.65rem",
               color: copied ? "var(--success)" : "var(--fg40)",
-              marginTop: "6px",
+              marginTop: "8px",
               transition: "color 0.3s ease",
             }}
           >
@@ -88,15 +90,14 @@ export default function Footer() {
         <div
           style={{
             display: "flex",
-            flexWrap: "wrap",
+            flexDirection: "column",
             alignItems: "center",
-            justifyContent: "space-between",
-            gap: "24px",
+            gap: "clamp(24px, 5vw, 40px)",
             paddingTop: "32px",
             borderTop: "1px solid var(--border)",
           }}
         >
-          {/* Left - Copyright */}
+          {/* Copyright */}
           <p
             style={{
               fontFamily: "'Space Mono', monospace",
@@ -105,11 +106,11 @@ export default function Footer() {
               margin: 0,
             }}
           >
-            GIULIA GARTNER © {new Date().getFullYear()}
+            TARUN MISTRY © {new Date().getFullYear()}
           </p>
 
-          {/* Center - Social Links */}
-          <div style={{ display: "flex", gap: "12px" }}>
+          {/* Social Links */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", justifyContent: "center" }}>
             {SOCIALS.map(({ label, href }) => (
               <a
                 key={label}
@@ -123,10 +124,11 @@ export default function Footer() {
                   textTransform: "uppercase",
                   color: "var(--fg)",
                   border: "1px solid var(--fg30)",
-                  padding: "8px 20px",
+                  padding: "10px 22px",
                   borderRadius: "9999px",
                   textDecoration: "none",
                   transition: "all 0.3s ease",
+                  whiteSpace: "nowrap",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = "var(--fg)";
@@ -141,26 +143,6 @@ export default function Footer() {
               </a>
             ))}
           </div>
-
-          {/* Right - Credit */}
-          <p
-            style={{
-              fontFamily: "'Space Mono', monospace",
-              fontSize: "0.65rem",
-              color: "var(--fg40)",
-              margin: 0,
-            }}
-          >
-            DESIGN &amp; DEV ✦{" "}
-            <a
-              href="https://twitter.com/est_ce_thomas"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "var(--fg)", textDecoration: "none" }}
-            >
-              THOMAS BOSC
-            </a>
-          </p>
         </div>
       </div>
     </footer>

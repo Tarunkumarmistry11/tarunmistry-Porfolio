@@ -186,7 +186,7 @@ export default function Navbar() {
             color: "var(--fg)",
           }}
         >
-          G.G.
+          T.M.
         </Link>
 
         {/* Desktop Right */}
@@ -195,14 +195,14 @@ export default function Navbar() {
           style={{ alignItems: "center", gap: "32px", marginLeft: "auto" }}
         >
           <a
-            href="https://www.instagram.com/giuligartner/"
+            href="https://www.instagram.com/el3v_3n/?hl=en"
             target="_blank"
             rel="noopener noreferrer"
             className="nav-link"
           >
             Instagram
           </a>
-          <a href="mailto:photo@giuligartner.com" className="nav-link">
+          <a href="mailto:mistrykumartarun@gmail.com" className="nav-link">
             Email
           </a>
           <ApertureDisplay />
@@ -227,7 +227,7 @@ export default function Navbar() {
               textDecoration: "none",
             }}
           >
-            G.G.
+            T.M.
           </Link>
 
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -304,7 +304,7 @@ export default function Navbar() {
 
           {/* Instagram & Email - Now using same large serif font */}
           <a
-            href="https://www.instagram.com/giuligartner/"
+            href="https://www.instagram.com/el3v_3n/?hl=en"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -324,7 +324,7 @@ export default function Navbar() {
           </a>
 
           <a
-            href="mailto:photo@giuligartner.com"
+            href="mailto:mistrykumartarun@gmail.com"
             style={{
               fontFamily: "'Playfair Display', serif",
               fontSize: "clamp(2.8rem, 11vw, 4.8rem)",
