@@ -9,17 +9,17 @@ const MONGO_URI =
 
 const projects = [
   {
-    title: "Visit Greenland",
-    slug: "visit-greenland",
+    title: "Beach House",
+    slug: "Beach-House",
     type: "stills",
     date: "March 2023",
-    location: "Greenland",
+    location: "Andaman Islands",
     description:
       "A visual journey through the icy landscapes of Greenland, capturing the raw beauty of the Arctic wilderness.",
     coverImageLeft:
-      "https://cdn.prod.website-files.com/60eeb025115a75902b86a796/647e3cc83822b06137a15c00_Header%201%20Left.jpg",
+      "https://ik.imagekit.io/eleven08/Eleven-gallery%20/20240101_074807-3.jpg?updatedAt=1718470808945",
     coverImageRight:
-      "https://cdn.prod.website-files.com/60eeb025115a75902b86a796/647e3ccc6c2ce83328c9b669_Header%202%20Right.jpg",
+      "https://ik.imagekit.io/eleven08/Eleven-gallery%20/20240101_074649-3.jpg?updatedAt=1718470128804",
     colorPalette: ["#214356", "#8db2c3", "#e7e7e9", "#989598", "#445f88"],
     images: [],
     featured: true,

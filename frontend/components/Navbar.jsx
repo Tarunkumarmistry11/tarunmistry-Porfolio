@@ -27,7 +27,7 @@ export default function Navbar() {
     gsap.fromTo(
       navRef.current,
       { opacity: 0, y: -18 },
-      { opacity: 1, y: 0, duration: 1, ease: "power3.out", delay: 1.1 }
+      { opacity: 1, y: 0, duration: 1, ease: "power3.out", delay: 1.1 },
     );
   }, []);
 
@@ -60,7 +60,7 @@ export default function Navbar() {
           ease: "power4.out",
           stagger: 0.1,
         },
-        "-=0.1"
+        "-=0.1",
       );
 
       tlRef.current = tl;
@@ -164,7 +164,10 @@ export default function Navbar() {
         }}
       >
         {/* Desktop Left */}
-        <div className="nav-desktop" style={{ alignItems: "center", gap: "36px" }}>
+        <div
+          className="nav-desktop"
+          style={{ alignItems: "center", gap: "36px" }}
+        >
           {NAV_LINKS.map(({ to, label }) => (
             <Link key={to} to={to} className="nav-link">
               {label}

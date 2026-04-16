@@ -70,7 +70,13 @@ export default function Home() {
   }, [reel]);
 
   return (
-    <div style={{ background: "var(--bg)", color: "var(--fg)", minHeight: "100vh" }}>
+    <div
+      style={{
+        background: "var(--bg)",
+        color: "var(--fg)",
+        minHeight: "100vh",
+      }}
+    >
       {/* HERO SECTION - VIDEO BACKGROUND */}
       <section
         style={{
@@ -210,7 +216,8 @@ export default function Home() {
       {/* PROJECTS SECTION */}
       <section
         style={{
-          padding: "clamp(40px, 6vw, 80px) clamp(20px, 5vw, 80px) clamp(80px, 10vw, 140px)",
+          padding:
+            "clamp(40px, 6vw, 80px) clamp(20px, 5vw, 80px) clamp(80px, 10vw, 140px)",
           maxWidth: "1100px",
           margin: "0 auto",
         }}
@@ -250,11 +257,20 @@ function DolomitesSection() {
           }}
         >
           A{" "}
-          <InlineImage src="https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61e939dee9c133675fbab858_Photo%20-%20Dolomites%20-%201.jpg" tilt="left" />{" "}
+          <InlineImage
+            src="https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61e939dee9c133675fbab858_Photo%20-%20Dolomites%20-%201.jpg"
+            tilt="left"
+          />{" "}
           small group of islands{" "}
-          <InlineImage src="https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61e939de8821f377935af4c3_Photo%20-%20Dolomites%20-%202.jpg" tilt="right" />{" "}
+          <InlineImage
+            src="https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61e939de8821f377935af4c3_Photo%20-%20Dolomites%20-%202.jpg"
+            tilt="right"
+          />{" "}
           where it all began...
-          <InlineImage src="https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61e939de360c7c91700e9743_Photo%20-%20Dolomites%20-%203.jpg" tilt="left" />
+          <InlineImage
+            src="https://cdn.prod.website-files.com/60db5e59f76ae577e9f50d42/61e939de360c7c91700e9743_Photo%20-%20Dolomites%20-%203.jpg"
+            tilt="left"
+          />
         </div>
 
         {/* Bio text */}
@@ -268,40 +284,106 @@ function DolomitesSection() {
             margin: "0 auto 60px",
           }}
         >
-          Tarun Kumar Mistry is a cinematic photographer, filmmaker, and visual storyteller based in the Andaman Islands. His work captures moments that feel like memories, blending deep tones, dreamy colors, and raw emotion. From quiet frames to powerful landscapes, he crafts visuals that don’t just show a place, but make you feel it.
+          Tarun Mistry is a cinematic photographer, filmmaker, and visual
+          storyteller based in the Andaman Islands. His work captures moments
+          that feel like memories, blending deep tones, dreamy colors, and raw
+          emotion. From quiet frames to powerful landscapes, he crafts visuals
+          that don’t just show a place, but make you feel it.
         </p>
 
-        {/* READ MY STORY Button */}
-        <a
-          href="/about"
-          style={{
-            fontFamily: "'Space Mono', monospace",
-            fontSize: "0.68rem",
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            color: "var(--fg)",
-            border: "1px solid var(--fg)",
-            backgroundColor: "transparent",
-            padding: "14px 36px",
-            borderRadius: "9999px",
-            textDecoration: "none",
-            display: "inline-block",
-            transition: "all 0.35s ease",
-            cursor: "pointer",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "var(--fg)";
-            e.currentTarget.style.color = "var(--bg)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-            e.currentTarget.style.color = "var(--fg)";
-          }}
-        >
-          READ MY STORY
-        </a>
+        {/* Premium READ MY STORY Button with GSAP Hover Effect */}
+        <ReadMyStoryButton />
       </div>
     </section>
+  );
+}
+
+// ── Premium READ MY STORY Button ─────────────────────────────
+function ReadMyStoryButton() {
+  const btnRef = useRef(null);
+  const bgRef = useRef(null);
+
+  useEffect(() => {
+    const btn = btnRef.current;
+    const bg = bgRef.current;
+    if (!btn || !bg) return;
+
+    const hoverTl = gsap.timeline({ paused: true });
+
+    hoverTl
+      .to(bg, {
+        scale: 1,
+        duration: 0.65,
+        ease: "power3.out",
+      })
+      .to(btn, {
+        y: -3,
+        duration: 0.4,
+        ease: "power2.out",
+      }, "-=0.5");
+
+    const handleMouseEnter = () => {
+      hoverTl.play();
+      btn.style.color = "var(--bg)";
+    };
+
+    const handleMouseLeave = () => {
+      hoverTl.reverse();
+      btn.style.color = "var(--fg)";
+    };
+
+    btn.addEventListener("mouseenter", handleMouseEnter);
+    btn.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      btn.removeEventListener("mouseenter", handleMouseEnter);
+      btn.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []);
+
+  return (
+    <a
+      ref={btnRef}
+      href="/about"
+      style={{
+        fontFamily: "'Space Mono', monospace",
+        fontSize: "0.68rem",
+        letterSpacing: "0.14em",
+        textTransform: "uppercase",
+        color: "var(--fg)",
+        border: "1px solid var(--fg)",
+        backgroundColor: "transparent",
+        padding: "14px 38px",
+        borderRadius: "9999px",
+        textDecoration: "none",
+        display: "inline-block",
+        position: "relative",
+        overflow: "hidden",
+        cursor: "pointer",
+      }}
+    >
+      {/* Expanding Background Layer */}
+      <div
+        ref={bgRef}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "var(--fg)",
+          borderRadius: "9999px",
+          transform: "scale(0)",
+          transformOrigin: "center",
+          zIndex: -1,
+        }}
+      />
+
+      {/* Button Text */}
+      <span style={{ position: "relative", zIndex: 2 }}>
+        READ MY STORY
+      </span>
+    </a>
   );
 }
 
@@ -327,14 +409,14 @@ function InlineImage({ src, tilt }) {
           start: "top 88%",
           once: true,
         },
-      }
+      },
     );
   }, []);
 
   const handleMouseEnter = () => {
     const rotation = tilt === "left" ? -12 : 12;
     gsap.to(ref.current, {
-      scale: 2,        // Reduced from 2 for mobile
+      scale: 1.8,
       rotation: rotation,
       duration: 0.5,
       ease: "power2.out",

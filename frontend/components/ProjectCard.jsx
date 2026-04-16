@@ -6,7 +6,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 export default function ProjectCard({ project }) {
-  const { title, slug, type, date, location, coverImageLeft, coverImageRight } = project;
+  const { title, slug, type, date, location, coverImageLeft, coverImageRight } =
+    project;
 
   const containerRef = useRef(null);
   const leftRef = useRef(null);
@@ -30,23 +31,31 @@ export default function ProjectCard({ project }) {
       },
     });
 
-    // Left image: moves left + subtle counterclockwise tilt
-    tl.to(left, {
-      x: "-72%",
-      scale: 0.94,
-      opacity: 0.78,
-      rotation: -6,
-      ease: "none",
-    }, 0);
+    // Left image
+    tl.to(
+      left,
+      {
+        x: "-72%",
+        scale: 0.94,
+        opacity: 0.78,
+        rotation: -6,
+        ease: "none",
+      },
+      0,
+    );
 
-    // Right image: moves right + subtle clockwise tilt
-    tl.to(right, {
-      x: "72%",
-      scale: 0.94,
-      opacity: 0.78,
-      rotation: 6,
-      ease: "none",
-    }, 0);
+    // Right image
+    tl.to(
+      right,
+      {
+        x: "72%",
+        scale: 0.94,
+        opacity: 0.78,
+        rotation: 6,
+        ease: "none",
+      },
+      0,
+    );
 
     // Center panel
     tl.fromTo(
@@ -58,7 +67,7 @@ export default function ProjectCard({ project }) {
         y: 0,
         ease: "power2.out",
       },
-      0.15
+      0.15,
     );
 
     return () => tl.kill();
@@ -79,7 +88,7 @@ export default function ProjectCard({ project }) {
         padding: "0 20px",
       }}
     >
-      {/* LEFT IMAGE - Fully rounded corners */}
+      {/* LEFT IMAGE */}
       <div
         ref={leftRef}
         style={{
@@ -89,7 +98,7 @@ export default function ProjectCard({ project }) {
           width: "54%",
           height: "100%",
           overflow: "hidden",
-          borderRadius: "28px",           // ← Uniform rounded corners on all sides
+          borderRadius: "28px",
           transformOrigin: "center center",
         }}
       >
@@ -104,7 +113,7 @@ export default function ProjectCard({ project }) {
         />
       </div>
 
-      {/* RIGHT IMAGE - Fully rounded corners */}
+      {/* RIGHT IMAGE */}
       <div
         ref={rightRef}
         style={{
@@ -114,7 +123,7 @@ export default function ProjectCard({ project }) {
           width: "54%",
           height: "100%",
           overflow: "hidden",
-          borderRadius: "28px",           // ← Uniform rounded corners on all sides
+          borderRadius: "28px",
           transformOrigin: "center center",
         }}
       >
@@ -173,33 +182,101 @@ export default function ProjectCard({ project }) {
           {title}
         </h2>
 
-        <Link
-          to={`/${type}/${slug}`}
-          style={{
-            fontFamily: "'Space Mono', monospace",
-            fontSize: "0.68rem",
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            border: "1px solid #fff",
-            padding: "14px 32px",
-            color: "#fff",
-            textDecoration: "none",
-            borderRadius: "9999px",
-            display: "inline-block",
-            transition: "all 0.3s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#fff";
-            e.currentTarget.style.color = "#000";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-            e.currentTarget.style.color = "#fff";
-          }}
-        >
-          VISIT SHOP
-        </Link>
+        {/* Premium VISIT SHOP Button */}
+        <VisitShopButton to={`/${type}/${slug}`} />
       </div>
     </div>
+  );
+}
+
+// ── Premium VISIT SHOP Button (Same style as READ MY STORY) ─────────────────
+function VisitShopButton({ to }) {
+  const btnRef = useRef(null);
+  const bgRef = useRef(null);
+
+  useEffect(() => {
+    const btn = btnRef.current;
+    const bg = bgRef.current;
+    if (!btn || !bg) return;
+
+    const hoverTl = gsap.timeline({ paused: true });
+
+    hoverTl
+      .to(bg, {
+        scale: 1,
+        duration: 0.65,
+        ease: "power3.out",
+      })
+      .to(
+        btn,
+        {
+          y: -3,
+          duration: 0.4,
+          ease: "power2.out",
+        },
+        "-=0.5",
+      );
+
+    const handleMouseEnter = () => {
+      hoverTl.play();
+      btn.style.color = "#000"; // Dark text on white bg
+    };
+
+    const handleMouseLeave = () => {
+      hoverTl.reverse();
+      btn.style.color = "#fff";
+    };
+
+    btn.addEventListener("mouseenter", handleMouseEnter);
+    btn.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      btn.removeEventListener("mouseenter", handleMouseEnter);
+      btn.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []);
+
+  return (
+    <Link
+      ref={btnRef}
+      to={to}
+      style={{
+        fontFamily: "'Space Mono', monospace",
+        fontSize: "0.68rem",
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        color: "#fff",
+        border: "1px solid #fff",
+        backgroundColor: "transparent",
+        padding: "14px 32px",
+        borderRadius: "9999px",
+        textDecoration: "none",
+        display: "inline-block",
+        position: "relative",
+        overflow: "hidden",
+        cursor: "pointer",
+        marginTop: "12px",
+      }}
+    >
+      {/* Expanding Background Layer */}
+      <div
+        ref={bgRef}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "#fff",
+          borderRadius: "9999px",
+          transform: "scale(0)",
+          transformOrigin: "center",
+          zIndex: -1,
+        }}
+      />
+
+      {/* Button Text */}
+      <span style={{ position: "relative", zIndex: 2 }}>VISIT SHOP</span>
+    </Link>
   );
 }
