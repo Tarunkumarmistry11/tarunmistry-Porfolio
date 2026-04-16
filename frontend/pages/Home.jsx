@@ -363,7 +363,6 @@ function InlineImage({ src, tilt }) {
         objectFit: "cover",
         borderRadius: "10px",
         margin: "0 8px",
-        boxShadow: "0 6px 20px rgba(0,0,0,0.4)",
         cursor: "pointer",
       }}
       onMouseEnter={handleMouseEnter}
