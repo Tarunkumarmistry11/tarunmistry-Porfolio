@@ -6,6 +6,10 @@ import Home from "../pages/Home";
 import Stills from "../pages/Stills";
 import Motion from "../pages/Motion";
 import About from "../pages/About";
+import Shop           from "../pages/Shop";
+import ProductDetail  from "../pages/ProductDetail";
+import Checkout       from "../components/shop/checkout/Checkout";
+import OrderSuccess   from "../pages/OrderSuccess";
 
 
 const pageTransition = {
@@ -24,6 +28,10 @@ function AnimatedRoutes() {
           <Route path="/stills"    element={<Stills />} />
           <Route path="/motion"    element={<Motion />} />
           <Route path="/about"     element={<About />}  />
+          <Route path="/shop"          element={<Shop />}           />
+          <Route path="/shop/:slug"    element={<ProductDetail />}  />
+          <Route path="/checkout"      element={<Checkout />}       />
+          <Route path="/order-success" element={<OrderSuccess />}   />
           <Route path="/:type/:slug" element={
             <div style={{
               minHeight: "100vh", backgroundColor: "var(--bg)",

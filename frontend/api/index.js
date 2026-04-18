@@ -33,7 +33,7 @@ const request = async (endpoint, options = {}) => {
 
     if (!response.ok) {
       throw new Error(
-        result?.message || `Request failed with status ${response.status}`
+        result?.message || `Request failed with status ${response.status}`,
       );
     }
 
@@ -57,8 +57,7 @@ const buildQuery = (params) => {
 };
 
 export const fetchProjects = async (type) => {
-  const params =
-    typeof type === "string" && type.trim() !== "" ? { type } : {};
+  const params = typeof type === "string" && type.trim() !== "" ? { type } : {};
   const query = buildQuery(params);
   return request(`/projects${query}`);
 };

@@ -10,7 +10,7 @@ export const getAbout = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  }
+  },
 );
 
 const aboutSlice = createSlice({

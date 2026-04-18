@@ -16,19 +16,19 @@ export const useScrollReveal = (options = {}) => {
         el,
         {
           opacity: 0,
-          y:       options.y ?? 60,
+          y: options.y ?? 60,
         },
         {
-          opacity:  1,
-          y:        0,
+          opacity: 1,
+          y: 0,
           duration: options.duration ?? 1.1,
-          ease:     options.ease ?? "power3.out",
+          ease: options.ease ?? "power3.out",
           scrollTrigger: {
-            trigger:  el,
-            start:    options.start ?? "top 88%",
-            once:     true,
+            trigger: el,
+            start: options.start ?? "top 88%",
+            once: true,
           },
-        }
+        },
       );
     });
 
@@ -51,15 +51,15 @@ export const useClipReveal = (options = {}) => {
         el,
         { clipPath: "inset(100% 0% 0% 0%)" },
         {
-          clipPath:  "inset(0% 0% 0% 0%)",
-          duration:  options.duration ?? 1.4,
-          ease:      options.ease ?? "power4.out",
+          clipPath: "inset(0% 0% 0% 0%)",
+          duration: options.duration ?? 1.4,
+          ease: options.ease ?? "power4.out",
           scrollTrigger: {
             trigger: el,
-            start:   options.start ?? "top 90%",
-            once:    true,
+            start: options.start ?? "top 90%",
+            once: true,
           },
-        }
+        },
       );
     });
 

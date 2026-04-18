@@ -4,7 +4,7 @@ import { gsap } from "gsap";
 import ApertureDisplay from "./ApertureDisplay";
 
 const NAV_LINKS = [
-  { to: "/stills", label: "Stills" },
+  { to: "/shop", label: "Shop" },
   { to: "/motion", label: "Motion" },
   { to: "/about", label: "About" },
 ];

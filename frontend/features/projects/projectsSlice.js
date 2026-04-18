@@ -9,12 +9,12 @@ export const getProjects = createAsyncThunk(
   "projects/getAll",
   async (type, { rejectWithValue }) => {
     try {
-      const data = await fetchProjects(type);  // returns data directly, NOT res.data
+      const data = await fetchProjects(type); // returns data directly, NOT res.data
       return data;
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  }
+  },
 );
 
 export const getFeaturedProjects = createAsyncThunk(
@@ -26,7 +26,7 @@ export const getFeaturedProjects = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  }
+  },
 );
 
 export const getProjectBySlug = createAsyncThunk(
@@ -38,7 +38,7 @@ export const getProjectBySlug = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  }
+  },
 );
 
 const projectsSlice = createSlice({
