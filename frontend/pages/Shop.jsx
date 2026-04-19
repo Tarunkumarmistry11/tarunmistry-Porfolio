@@ -234,7 +234,7 @@ export default function Shop() {
             marginTop: "120px",
           }}
         >
-          Presets · LUTs · Prints · Inspired collections · All delivered via
+          Presets · LUTs · Prints · All delivered via
           email
         </p>
 
@@ -347,10 +347,8 @@ export default function Shop() {
                 onClick={(e) => e.stopPropagation()}
                 style={{
                   position: "absolute",
-                  top: "calc(100% + 8px)",
-                  right: 0,
-                  /*Mobile view adjustment */
-                  
+                  // top: "calc(100% + 8px)",
+                  // right: 0,
                   background: "var(--bg)",
                   border: "1px solid var(--fg20)",
                   zIndex: 100,
