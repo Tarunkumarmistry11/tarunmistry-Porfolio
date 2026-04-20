@@ -7,6 +7,22 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Environment variables - NEVER commit these!
+.env
+.env.local
+.env.*.local
+*.env
+
+# Keep example file for developers
+!.env.example
+
+# If you have env files in subfolders
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+backend/.env          # add if you have backend too
+backend/.env.local
+
 node_modules
 dist
 dist-ssr
