@@ -10,63 +10,35 @@ const SECTIONS = [
     heading: "What we collect",
     body: `When you make a purchase, we collect the information you provide such as your name, email address, and billing details. This information is used to process your order, deliver your files, and maintain a record of your purchase.
 
-When you browse the site, certain technical information may also be collected automatically. This can include your IP address, browser type, device information, and how you interact with the site. This data helps us understand performance, improve usability, and refine the overall experience.
-
-If you choose to receive updates, we may use your email to share information about new releases, products, or updates. You can opt out of these communications at any time.`,
+When you browse the site, certain technical information may also be collected automatically. This can include your IP address, browser type, device information, and how you interact with the site. This data helps us understand performance, improve usability, and refine the overall experience. If you choose to receive updates, we may use your email to share information about new releases, products, or updates. You can opt out of these communications at any time.`,
   },
   {
     heading: "Consent",
-    body: `By providing your information to complete a purchase, you consent to its use for that specific purpose.
-
-If we request your information for any additional purpose, such as marketing, you will always be given the option to accept or decline.
-
-You can withdraw your consent at any time by contacting us. Once withdrawn, we will stop using your information for the purposes you no longer agree to, unless required by law.`,
+    body: `By providing your information to complete a purchase, you consent to its use for that specific purpose. If we request your information for any additional purpose, such as marketing, you will always be given the option to accept or decline. You can withdraw your consent at any time by contacting us. Once withdrawn, we will stop using your information for the purposes you no longer agree to, unless required by law.`,
   },
   {
     heading: "Disclosure",
-    body: `Your personal information is not sold or shared unnecessarily.
-
-It may only be disclosed if required by law, to comply with legal obligations, or if there is a violation of our terms or misuse of the service.`,
+    body: `Your personal information is not sold or shared unnecessarily. It may only be disclosed if required by law, to comply with legal obligations, or if there is a violation of our terms or misuse of the service.`,
   },
   {
     heading: "Payments",
-    body: `All payments are processed securely through trusted third party providers such as Stripe.
-
-Your payment information is encrypted and handled in accordance with PCI DSS security standards. Sensitive details such as card numbers are never stored on our servers beyond what is required to complete the transaction.
-
-This ensures that your financial data remains protected throughout the process.`,
+    body: `All payments are processed securely through trusted third party providers such as Razorpay or Stripe. Your payment information is encrypted and handled in accordance with PCI DSS security standards. Sensitive details such as card numbers are never stored on our servers beyond what is required to complete the transaction. This ensures that your financial data remains protected throughout the process.`,
   },
   {
     heading: "Third party services",
-    body: `We rely on third party services to operate the store, process payments, and deliver functionality.
-
-These providers only access the information necessary to perform their specific role. They are not permitted to use your data for unrelated purposes.
-
-Each service operates under its own privacy policy, and we recommend reviewing them if you want a deeper understanding of how your data is handled.
-
-If a transaction involves services based outside your country, your data may be subject to the laws of that jurisdiction.`,
+    body: `We rely on third party services to operate the store, process payments, and deliver functionality. These providers only access the information necessary to perform their specific role. They are not permitted to use your data for unrelated purposes. Each service operates under its own privacy policy, and we recommend reviewing them if you want a deeper understanding of how your data is handled. If a transaction involves services based outside your country, your data may be subject to the laws of that jurisdiction.`,
   },
   {
     heading: "External links",
-    body: `Some areas of the site may contain links to external platforms.
-
-Once you leave this site, we are not responsible for the privacy practices or content of those third party websites. We encourage reviewing their policies before sharing any personal information.`,
+    body: `Some areas of the site may contain links to external platforms. Once you leave this site, we are not responsible for the privacy practices or content of those third party websites. We encourage reviewing their policies before sharing any personal information.`,
   },
   {
     heading: "Security",
-    body: `We take reasonable and appropriate measures to protect your information.
-
-All sensitive data is encrypted and handled using industry standard security practices. Access to personal data is limited and controlled to prevent unauthorized use.
-
-While no system can guarantee absolute security, we continuously work to maintain a safe and reliable environment.`,
+    body: `We take reasonable and appropriate measures to protect your information. All sensitive data is encrypted and handled using industry standard security practices. Access to personal data is limited and controlled to prevent unauthorized use. While no system can guarantee absolute security, we continuously work to maintain a safe and reliable environment.`,
   },
   {
     heading: "Cookies",
-    body: `Cookies are used to enhance your browsing experience.
-
-They help remember your preferences, maintain session information, and understand how you interact with the site. This allows us to improve performance and deliver a smoother experience.
-
-You can choose to disable cookies through your browser settings, though some features of the site may not function as intended.`,
+    body: `Cookies are used to enhance your browsing experience. They help remember your preferences, maintain session information, and understand how you interact with the site. This allows us to improve performance and deliver a smoother experience. You can choose to disable cookies through your browser settings, though some features of the site may not function as intended.`,
   },
   {
     heading: "Age requirement",
@@ -74,9 +46,7 @@ You can choose to disable cookies through your browser settings, though some fea
   },
   {
     heading: "Changes to this policy",
-    body: `This privacy policy may be updated from time to time to reflect changes in practices, legal requirements, or improvements to the service.
-
-Any updates will take effect immediately once published on this page.`,
+    body: `This privacy policy may be updated from time to time to reflect changes in practices, legal requirements, or improvements to the service. Any updates will take effect immediately once published on this page.`,
   },
   {
     heading: "Contact",
@@ -219,7 +189,7 @@ export function PolicyContent({ sections }) {
               lineHeight: 1.95,
               color: "var(--fg60)",
               whiteSpace: "pre-line",
-              maxWidth: "720px",
+              maxWidth: "1200px",
             }}
           >
             {s.body}

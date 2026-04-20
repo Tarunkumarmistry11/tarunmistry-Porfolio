@@ -10,6 +10,7 @@ const aboutRoutes = require("./routes/aboutRoutes");
 const productRoutes = require("./routes/productRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 // const webhookRoutes = require("./routes/webhookRoutes"); // ← commented for now
+const newsletterRoutes = require("./routes/newsletterRoutes");
 
 connectDB();
 
@@ -36,6 +37,7 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/about", aboutRoutes);
 app.use("/api/shop", productRoutes);        // Shop is active
 app.use("/api/orders", orderRoutes);        // Orders route is active (but payments disabled)
+app.use("/api/newsletter", newsletterRoutes);
 
 // Health check
 app.get("/api/health", (_, res) => res.json({ status: "OK" }));

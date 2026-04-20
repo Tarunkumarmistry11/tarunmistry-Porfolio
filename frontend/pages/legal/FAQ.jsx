@@ -11,7 +11,7 @@ They are carefully shaped adjustments that control light, color, contrast, and m
 
 Each preset is built through a consistent visual approach, helping you create images that feel cohesive, atmospheric, and intentional. Instead of starting from scratch every time, you begin with a strong foundation.
 
-They are not meant to replace your vision, but to guide it — a starting point that helps you move faster, while still leaving room to refine the image into something that feels truly yours.`,
+They are not meant to replace your vision, but to guide it, a starting point that helps you move faster, while still leaving room to refine the image into something that feels truly yours.`,
 },
 
 {
@@ -47,7 +47,7 @@ a: `LUTs, or Look-Up Tables, are the video equivalent of presets. They transform
 
 Instead of adjusting each parameter manually, a LUT applies a predefined color grade that brings consistency and atmosphere to your video.
 
-It is not just about color — it is about how the footage feels.`,
+It is not just about color, it is about how the footage feels.`,
 },
 
 {
@@ -71,7 +71,7 @@ For all other regions, prices are automatically shown in USD. This allows a more
 q: "How will I receive my files?",
 a: `Once your purchase is complete, you will receive an email containing your download link.
 
-This email also acts as your access point — your purchase history and files remain available there whenever you need them.
+This email also acts as your access point, your purchase history and files remain available there whenever you need them.
 
 If the email does not appear in your inbox, check your spam folder. If it is still missing, simply reach out and it will be resolved quickly.`,
 },
@@ -80,7 +80,7 @@ If the email does not appear in your inbox, check your spam folder. If it is sti
 q: "I am having trouble downloading my files",
 a: `For the best experience, download your files using Chrome on either your phone or desktop.
 
-If the issue continues, do not worry — just reach out and you will be guided through it. The goal is to make sure you receive everything without friction.`,
+If the issue continues, do not worry, just reach out and you will be guided through it. The goal is to make sure you receive everything without friction.`,
 },
 
 {
@@ -92,7 +92,7 @@ From importing the files to applying them correctly, everything is clearly expla
 
 {
 q: "Will the presets work in one click?",
-a: `In many cases, yes — but every image carries its own light, tones, and environment.
+a: `In many cases, yes,  but every image carries its own light, tones, and environment.
 
 Because of this, small adjustments may sometimes be needed to refine the final result.
 
@@ -119,7 +119,7 @@ a: `Due to the digital nature of the products, refunds cannot be offered once th
 
 However, if you face any issue before accessing your files, you can reach out and it will be handled properly.
 
-Support is always available — you are not left figuring things out alone.`,
+Support is always available, you are not left figuring things out alone.`,
 },
 ];
 
@@ -186,23 +186,23 @@ export default function FAQ() {
   }, [open]);
 
   // 🔥 Cursor Glow
-  const handleMouseMove = (e) => {
-    const glow = glowRef.current;
-    if (!glow) return;
+  // const handleMouseMove = (e) => {
+  //   const glow = glowRef.current;
+  //   if (!glow) return;
 
-    gsap.to(glow, {
-      x: e.clientX - 150,
-      y: e.clientY - 150,
-      duration: 0.4,
-      ease: "power3.out",
-    });
-  };
+  //   gsap.to(glow, {
+  //     x: e.clientX - 150,
+  //     y: e.clientY - 150,
+  //     duration: 0.4,
+  //     ease: "power3.out",
+  //   });
+  // };
 
   return (
     <LegalLayout title="FAQ" subtitle="Frequently asked questions">
       <div
         ref={containerRef}
-        onMouseMove={handleMouseMove}
+        // onMouseMove={handleMouseMove}
         style={{
           position: "relative",
           maxWidth: "1200px",

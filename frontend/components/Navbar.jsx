@@ -189,7 +189,7 @@ export default function Navbar() {
             color: "var(--fg)",
           }}
         >
-          T.M.
+          EL3V3N
         </Link>
 
         {/* Desktop Right */}
@@ -230,7 +230,7 @@ export default function Navbar() {
               textDecoration: "none",
             }}
           >
-            T.M.
+            EL3V3N
           </Link>
 
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>

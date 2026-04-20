@@ -56,7 +56,7 @@ export default function LegalLayout({ title, subtitle, children }) {
             ref={titleRef}
             style={{
               fontFamily:    "'Playfair Display', serif",
-              fontSize:      "clamp(3rem,9vw,7rem)",
+              fontSize:      "clamp(3rem,9vw,5rem)",
               fontWeight:    400,
               lineHeight:    0.92,
               letterSpacing: "-0.025em",
@@ -85,7 +85,7 @@ export default function LegalLayout({ title, subtitle, children }) {
       {/* Content */}
       <section style={{
         padding:  "clamp(48px,7vw,80px) clamp(20px,5vw,80px) clamp(80px,10vw,120px)",
-        maxWidth: "1100px",
+        maxWidth: "1200px",
         margin:   "0 auto",
       }}>
         {children}
