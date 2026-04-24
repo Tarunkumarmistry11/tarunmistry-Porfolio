@@ -1,188 +1,320 @@
-const Order = require("../models/Order");
-const Product = require("../models/Product");
-const {
-  createPaymentIntent,
-  constructWebhookEvent,
-} = require("../services/stripeService");
-const { createOrder, verifySignature } = require("../services/razorpayService");
-const { sendPurchaseEmail } = require("../services/emailService");
+const Order    = require("../models/Order");
+const Product  = require("../models/Product");
+
+// Active payment service — Razorpay only
+const { createOrder: createRzOrder, verifySignature } =
+  require("../services/razorpayService");
+
+const { sendPurchaseEmail }    = require("../services/emailService");
 const { getSignedDownloadUrl } = require("../services/supabaseService");
 
-// ── Shared: fulfil a paid order ───────────────────────────
-// IMPLEMENT: called by both Stripe webhook and Razorpay verify
-// 1. Mark order as paid
-// 2. Generate signed download URLs per product
-// 3. Send email with links
-// 4. Mark emailSent = true
+// ── STRIPE (commented out — uncomment when STRIPE_SECRET_KEY is ready) ─────
+// const { createPaymentIntent, constructWebhookEvent } =
+//   require("../services/razorpayService"); // these will be exported from there
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// SHARED FULFILMENT — called after ANY successful payment (Razorpay or Stripe)
+//
+// Design decisions:
+//  - Idempotent: checks paymentStatus === "paid" before doing anything.
+//    Safe to call twice (e.g. webhook + direct verify race condition).
+//  - Generates Supabase signed URLs per file per product in the order.
+//  - Sends email only once (emailSent flag prevents duplicates).
+//  - If a product has no downloadFiles (e.g. physical print), it is skipped.
+// ════════════════════════════════════════════════════════════════════════════
 const fulfilOrder = async (orderId, paymentId) => {
+  // Load the order with product details populated
   const order = await Order.findById(orderId).populate("items.product");
-  if (!order || order.paymentStatus === "paid") return;
 
+  if (!order) throw new Error(`Order ${orderId} not found`);
+
+  // IDEMPOTENCY GUARD — if already paid, do nothing and return silently.
+  // This handles the race between webhook and direct /verify calls.
+  if (order.paymentStatus === "paid") {
+    console.log(`[fulfilOrder] Order ${orderId} already fulfilled — skipping`);
+    return;
+  }
+
+  // Mark as paid immediately so concurrent calls see it
   order.paymentStatus = "paid";
-  order.paymentId = paymentId;
+  order.paymentId     = paymentId;
 
+  // Generate one signed download URL per file per product
   const downloadLinks = [];
   for (const item of order.items) {
-    for (const filePath of item.product.downloadFiles) {
+    const product = item.product;
+
+    // Skip items where the product document wasn't populated (shouldn't happen)
+    if (!product) {
+      console.warn(`[fulfilOrder] item.product not populated for order ${orderId}`);
+      continue;
+    }
+
+    // Skip products with no downloadFiles (e.g. physical prints)
+    if (!product.downloadFiles?.length) continue;
+
+    for (const filePath of product.downloadFiles) {
+      // getSignedDownloadUrl generates a 48-hour expiring Supabase URL
       const url = await getSignedDownloadUrl(filePath);
-      downloadLinks.push({ productName: item.product.name, url });
+      downloadLinks.push({ productName: product.name, url });
     }
   }
 
+  // Store the raw URLs on the order for reference (never exposed via API)
   order.downloadLinks = downloadLinks.map((l) => l.url);
   await order.save();
 
+  // Send the purchase email — only if not already sent
   if (!order.emailSent) {
     await sendPurchaseEmail({
-      to: order.email,
-      name: order.name,
-      items: order.items,
-      downloadLinks,
-      orderId: order._id.toString().slice(-8).toUpperCase(),
+      to:            order.email,
+      name:          order.name,
+      items:         order.items,
+      downloadLinks, // array of { productName, url }
+      orderId:       order._id.toString().slice(-8).toUpperCase(), // e.g. "A3F9B2C1"
     });
+
     order.emailSent = true;
     await order.save();
+
+    console.log(`[fulfilOrder] Email sent to ${order.email} for order ${orderId}`);
   }
 };
 
-// ── Stripe: create PaymentIntent ──────────────────────────
-// IMPLEMENT: receive { items, currency, email, name, country }
-// Returns { clientSecret, orderId } to frontend
-const createStripeIntent = async (req, res, next) => {
-  try {
-    const { items, currency, email, name, country } = req.body;
-    const products = await Product.find({
-      _id: { $in: items.map((i) => i.productId) },
-    });
 
-    const subtotal = products.reduce((sum, p) => {
-      const qty =
-        items.find((i) => i.productId === p._id.toString())?.quantity || 1;
-      return sum + (p.price[country] || p.price.US) * qty;
-    }, 0);
-
-    const intent = await createPaymentIntent({
-      amount: subtotal,
-      currency,
-      metadata: { email, name },
-    });
-
-    const order = await Order.create({
-      email,
-      name,
-      currency,
-      country,
-      paymentMethod: "stripe",
-      paymentId: intent.id,
-      paymentStatus: "pending",
-      subtotal,
-      items: products.map((p) => ({
-        product: p._id,
-        name: p.name,
-        quantity:
-          items.find((i) => i.productId === p._id.toString())?.quantity || 1,
-        price: p.price[country] || p.price.US,
-        currency,
-      })),
-    });
-
-    res.json({ clientSecret: intent.client_secret, orderId: order._id });
-  } catch (err) {
-    next(err);
-  }
-};
-
-// ── Razorpay: create order ────────────────────────────────
-// IMPLEMENT: receive { items, email, name }
-// Returns { orderId, razorpayOrderId, amount, keyId } to frontend
+// ════════════════════════════════════════════════════════════════════════════
+// POST /api/orders/razorpay/create
+//
+// Step 1 of the Razorpay payment flow.
+// Frontend sends: { items: [{productId, quantity}], email, name }
+//
+// What we do here:
+//  1. Fetch products from DB (NEVER trust frontend prices)
+//  2. Calculate total in INR from DB prices
+//  3. Create a Razorpay order (returns a razorpayOrderId)
+//  4. Save a pending Order to MongoDB
+//  5. Return { orderId, razorpayOrderId, amount (paise), keyId } to frontend
+//
+// The frontend then opens the Razorpay modal with these details.
+// ════════════════════════════════════════════════════════════════════════════
 const createRazorpayOrder = async (req, res, next) => {
   try {
     const { items, email, name } = req.body;
-    const products = await Product.find({
-      _id: { $in: items.map((i) => i.productId) },
-    });
 
+    // Validate required fields
+    if (!items?.length || !email?.trim() || !name?.trim()) {
+      res.status(400);
+      throw new Error("items, email, and name are all required");
+    }
+
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      res.status(400);
+      throw new Error("Invalid email address");
+    }
+
+    // Fetch products from DB using the IDs sent by the frontend
+    const productIds = items.map((i) => i.productId);
+    const products   = await Product.find({ _id: { $in: productIds }, active: true });
+
+    if (!products.length) {
+      res.status(400);
+      throw new Error("No valid active products found for the given IDs");
+    }
+
+    // Calculate total in INR — using DB prices, never frontend prices
     const subtotal = products.reduce((sum, p) => {
-      const qty =
-        items.find((i) => i.productId === p._id.toString())?.quantity || 1;
-      return sum + p.price.IN * qty;
+      const cartItem = items.find((i) => i.productId === p._id.toString());
+      const qty      = cartItem?.quantity || 1;
+      // p.price.IN is the INR price set in the Product model
+      return sum + (p.price?.IN || 0) * qty;
     }, 0);
 
-    const rzOrder = await createOrder({
-      amount: subtotal,
-      receipt: `rcpt_${Date.now()}`,
+    if (subtotal <= 0) {
+      res.status(400);
+      throw new Error("Order total must be greater than zero");
+    }
+
+    // Create Razorpay order on their servers
+    // This gives us a razorpayOrderId that the frontend modal needs
+    const rzOrder = await createRzOrder({
+      amount:  subtotal,                    // in rupees — service converts to paise
+      receipt: `rcpt_${Date.now()}`,        // unique receipt for your records
     });
 
+    // Save a PENDING order to MongoDB
+    // Status will be updated to "paid" by verifyRazorpayPayment after user pays
     const order = await Order.create({
-      email,
-      name,
-      currency: "INR",
-      country: "IN",
+      email:         email.trim().toLowerCase(),
+      name:          name.trim(),
+      currency:      "INR",
+      country:       "IN",
       paymentMethod: "razorpay",
-      paymentId: rzOrder.id,
+      paymentId:     rzOrder.id,    // Razorpay order ID stored as paymentId
       paymentStatus: "pending",
       subtotal,
-      items: products.map((p) => ({
-        product: p._id,
-        name: p.name,
-        quantity:
-          items.find((i) => i.productId === p._id.toString())?.quantity || 1,
-        price: p.price.IN,
-        currency: "INR",
-      })),
+      items: products.map((p) => {
+        const cartItem = items.find((i) => i.productId === p._id.toString());
+        return {
+          product:  p._id,
+          name:     p.name,
+          quantity: cartItem?.quantity || 1,
+          price:    p.price?.IN || 0,
+          currency: "INR",
+        };
+      }),
     });
+
+    // Return everything the frontend needs to open the Razorpay modal
+    res.json({
+      orderId:         order._id,         // our MongoDB order ID — sent back to verify
+      razorpayOrderId: rzOrder.id,         // Razorpay's order ID — used in modal options
+      amount:          rzOrder.amount,     // in paise — Razorpay modal uses this directly
+      currency:        "INR",
+      keyId:           process.env.RAZORPAY_KEY_ID, // public key — safe to send to frontend
+    });
+
+  } catch (err) { next(err); }
+};
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// POST /api/orders/razorpay/verify
+//
+// Step 2 of the Razorpay payment flow — called after user pays in the modal.
+// Frontend sends: { orderId, razorpayOrderId, razorpayPaymentId, razorpaySignature }
+//
+// What we do:
+//  1. Verify the HMAC-SHA256 signature (cryptographic proof of genuine payment)
+//  2. If valid → call fulfilOrder (mark paid, generate URLs, send email)
+//  3. If invalid → mark order as failed, return 400
+//
+// SECURITY: Never skip signature verification. It's the only thing preventing
+// someone from faking a payment by calling this endpoint directly.
+// ════════════════════════════════════════════════════════════════════════════
+const verifyRazorpayPayment = async (req, res, next) => {
+  try {
+    const {
+      orderId,
+      razorpayOrderId,
+      razorpayPaymentId,
+      razorpaySignature,
+    } = req.body;
+
+    // Validate all four fields are present
+    if (!orderId || !razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+      res.status(400);
+      throw new Error(
+        "orderId, razorpayOrderId, razorpayPaymentId, and razorpaySignature are all required"
+      );
+    }
+
+    // SIGNATURE VERIFICATION — the security gate
+    // If this fails, the payment is either fake or tampered with
+    const isValid = verifySignature(razorpayOrderId, razorpayPaymentId, razorpaySignature);
+
+    if (!isValid) {
+      // Mark the order as failed in DB so we have an audit trail
+      await Order.findByIdAndUpdate(orderId, { paymentStatus: "failed" });
+
+      console.warn(
+        `[verifyRazorpayPayment] Invalid signature for order ${orderId}. ` +
+        `Possible tampering attempt.`
+      );
+
+      res.status(400);
+      throw new Error("Invalid payment signature — payment could not be verified");
+    }
+
+    // Signature is valid — fulfil the order
+    // fulfilOrder is idempotent — safe to call even if webhook already ran
+    await fulfilOrder(orderId, razorpayPaymentId);
 
     res.json({
-      orderId: order._id,
-      razorpayOrderId: rzOrder.id,
-      amount: rzOrder.amount,
-      currency: "INR",
-      keyId: process.env.RAZORPAY_KEY_ID,
+      success: true,
+      message: "Payment verified. Your files have been sent to your email.",
     });
-  } catch (err) {
-    next(err);
-  }
+
+  } catch (err) { next(err); }
 };
 
-// ── Razorpay: verify payment + fulfil ────────────────────
-const verifyRazorpay = async (req, res, next) => {
+
+// ════════════════════════════════════════════════════════════════════════════
+// GET /api/orders/:id — fetch order for the success page
+//
+// Used by OrderSuccess.jsx to show order details.
+// downloadLinks are intentionally excluded — they were already emailed.
+// ════════════════════════════════════════════════════════════════════════════
+const getOrder = async (req, res, next) => {
   try {
-    const { orderId, razorpayOrderId, razorpayPaymentId, razorpaySignature } =
-      req.body;
-    if (
-      !verifySignature(razorpayOrderId, razorpayPaymentId, razorpaySignature)
-    ) {
-      return res.status(400).json({ message: "Invalid signature" });
+    const order = await Order.findById(req.params.id)
+      .select("-downloadLinks")  // never expose signed URLs through the API
+      .populate("items.product", "name category coverImage");
+
+    if (!order) {
+      res.status(404);
+      throw new Error("Order not found");
     }
-    await fulfilOrder(orderId, razorpayPaymentId);
-    res.json({ success: true });
-  } catch (err) {
-    next(err);
-  }
+
+    res.json(order);
+  } catch (err) { next(err); }
 };
 
-// ── Stripe: webhook handler ───────────────────────────────
-// IMPLEMENT: raw body required — mounted BEFORE express.json() in server.js
-const stripeWebhook = async (req, res) => {
-  try {
-    const event = constructWebhookEvent(
-      req.body,
-      req.headers["stripe-signature"],
-    );
-    if (event.type === "payment_intent.succeeded") {
-      const intent = event.data.object;
-      const order = await Order.findOne({ paymentId: intent.id });
-      if (order) await fulfilOrder(order._id.toString(), intent.id);
-    }
-    res.json({ received: true });
-  } catch (err) {
-    res.status(400).send(`Webhook error: ${err.message}`);
-  }
-};
 
 module.exports = {
-  createStripeIntent,
   createRazorpayOrder,
-  verifyRazorpay,
-  stripeWebhook,
+  verifyRazorpayPayment,
+  getOrder,
+  fulfilOrder, // exported so webhook can call it when Stripe is added
 };
+
+
+// ── STRIPE CONTROLLER FUNCTIONS (commented out — add when STRIPE_SECRET_KEY ready) ──
+//
+// const createStripeIntent = async (req, res, next) => {
+//   try {
+//     const { items, currency, email, name, country } = req.body;
+//     if (!items?.length || !email || !name) {
+//       res.status(400); throw new Error("items, email and name are required");
+//     }
+//     const products = await Product.find({ _id: { $in: items.map(i => i.productId) } });
+//     const subtotal = products.reduce((sum, p) => {
+//       const qty = items.find(i => i.productId === p._id.toString())?.quantity || 1;
+//       return sum + (p.price[country] ?? p.price.US) * qty;
+//     }, 0);
+//     const intent = await createPaymentIntent({ amount: subtotal, currency, metadata: { email, name } });
+//     const order  = await Order.create({
+//       email, name, currency, country,
+//       paymentMethod: "stripe",
+//       paymentId:     intent.id,
+//       paymentStatus: "pending",
+//       subtotal,
+//       items: products.map(p => ({
+//         product:  p._id,
+//         name:     p.name,
+//         quantity: items.find(i => i.productId === p._id.toString())?.quantity || 1,
+//         price:    p.price[country] ?? p.price.US,
+//         currency,
+//       })),
+//     });
+//     res.json({ clientSecret: intent.client_secret, orderId: order._id });
+//   } catch (err) { next(err); }
+// };
+//
+// const stripeWebhook = async (req, res) => {
+//   try {
+//     const event = constructWebhookEvent(req.body, req.headers["stripe-signature"]);
+//     if (event.type === "payment_intent.succeeded") {
+//       const intent = event.data.object;
+//       const order  = await Order.findOne({ paymentId: intent.id });
+//       if (order) await fulfilOrder(order._id.toString(), intent.id);
+//     }
+//     res.json({ received: true });
+//   } catch (err) {
+//     res.status(400).send(`Webhook error: ${err.message}`);
+//   }
+// };
+//
+// Add to exports when ready:
+// module.exports = { ..., createStripeIntent, stripeWebhook };

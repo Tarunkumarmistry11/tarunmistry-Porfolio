@@ -12,11 +12,18 @@ const orderRoutes = require("./routes/orderRoutes");
 // const webhookRoutes = require("./routes/webhookRoutes"); // ← commented for now
 const newsletterRoutes = require("./routes/newsletterRoutes");
 
+// ── STRIPE WEBHOOK (commented out — uncomment when STRIPE_SECRET_KEY is ready)
+// IMPORTANT: stripeWebhook must be mounted BEFORE express.json() because
+// Stripe requires the raw (unparsed) request body to verify the signature.
+// Once express.json() runs, the raw body is gone.
+// const { stripeWebhook } = require("./controllers/orderController");
+
+
 connectDB();
 
 const app = express();
 
-// CORS
+// CORS — allow both localhost variants used by Vite
 app.use(
   cors({
     origin: [
@@ -40,7 +47,7 @@ app.use("/api/orders", orderRoutes);        // Orders route is active (but payme
 app.use("/api/newsletter", newsletterRoutes);
 
 // Health check
-app.get("/api/health", (_, res) => res.json({ status: "OK" }));
+app.get("/api/health", (_, res) => res.json({ status: "OK", timestamp: new Date().toISOString() }));
 
 // Global error handler
 app.use(errorHandler);
@@ -48,4 +55,7 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
+  console.log(`   Razorpay: ${process.env.RAZORPAY_KEY_ID ? "✓ configured" : "✗ RAZORPAY_KEY_ID missing"}`);
+  console.log(`   Email:    ${process.env.SMTP_USER    ? "✓ configured" : "✗ SMTP_USER missing"}`);
+  console.log(`   Supabase: ${process.env.SUPABASE_URL ? "✓ configured" : "✗ SUPABASE_URL missing"}`);
 });

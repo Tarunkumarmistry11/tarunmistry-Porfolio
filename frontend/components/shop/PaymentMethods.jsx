@@ -6,40 +6,6 @@ gsap.registerPlugin(ScrollTrigger);
 
 const PAYMENT_METHODS = [
   {
-    name: "American Express",
-    icon: (
-      <svg viewBox="0 0 48 30" width="48" height="30" xmlns="http://www.w3.org/2000/svg">
-        <rect width="48" height="30" rx="4" fill="#2557D6"/>
-        <text x="6" y="20" fontFamily="Arial" fontWeight="900" fontSize="11" fill="white" letterSpacing="-0.5">AMEX</text>
-      </svg>
-    ),
-  },
-  {
-    name: "Apple Pay",
-    icon: (
-      <svg viewBox="0 0 60 30" width="60" height="30" xmlns="http://www.w3.org/2000/svg">
-        <rect width="60" height="30" rx="4" fill="white" stroke="#E0E0E0" strokeWidth="0.8"/>
-        <g transform="translate(8, 5)">
-          <path d="M12.5 4.2C13.3 3.2 13.8 1.9 13.6 0.6 12.4 0.7 11 1.4 10.2 2.4 9.4 3.3 8.8 4.7 9.1 5.9 10.4 6 11.7 5.2 12.5 4.2Z" fill="#1A1A1A"/>
-          <path d="M13.6 6.1C11.8 6 10.3 7.1 9.4 7.1 8.5 7.1 7.2 6.2 5.8 6.2 3.8 6.2 1.7 7.3 0.6 9.2-1.6 13 0 18.7 2.1 21.8 3.2 23.3 4.5 25 6.2 24.9 7.8 24.8 8.4 23.9 10.4 23.9 12.4 23.9 12.9 24.9 14.7 24.9 16.4 24.9 17.5 23.4 18.6 21.9 19.8 20.2 20.3 18.5 20.3 18.4 20.2 18.4 17.4 17.3 17.4 14.2 17.4 11.6 19.6 10.4 19.7 10.3 18.4 8.3 16.3 6.1 13.6 6.1Z" fill="#1A1A1A"/>
-          <text x="22" y="18" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" fontWeight="600" fontSize="10" fill="#1A1A1A">Pay</text>
-        </g>
-      </svg>
-    ),
-  },
-  {
-    name: "Bancontact",
-    icon: (
-      <svg viewBox="0 0 60 30" width="60" height="30" xmlns="http://www.w3.org/2000/svg">
-        <rect width="60" height="30" rx="4" fill="white" stroke="#E0E0E0" strokeWidth="0.8"/>
-        <rect x="0" y="0" width="30" height="30" rx="4" fill="#005498"/>
-        <rect x="30" y="0" width="30" height="30" rx="4" fill="#FFD700"/>
-        <text x="6" y="20" fontFamily="Arial" fontWeight="700" fontSize="7" fill="white">BAN</text>
-        <text x="33" y="20" fontFamily="Arial" fontWeight="700" fontSize="7" fill="#005498">CON</text>
-      </svg>
-    ),
-  },
-  {
     name: "Google Pay",
     icon: (
       <svg viewBox="0 0 60 30" width="60" height="30" xmlns="http://www.w3.org/2000/svg">
@@ -54,17 +20,6 @@ const PAYMENT_METHODS = [
     ),
   },
   {
-    name: "iDEAL / Wero",
-    icon: (
-      <svg viewBox="0 0 60 30" width="60" height="30" xmlns="http://www.w3.org/2000/svg">
-        <rect width="60" height="30" rx="4" fill="white" stroke="#E0E0E0" strokeWidth="0.8"/>
-        <rect x="2" y="2" width="18" height="26" rx="2" fill="#CC0066"/>
-        <text x="5" y="20" fontFamily="Arial" fontWeight="900" fontSize="8" fill="white">iD</text>
-        <text x="24" y="18" fontFamily="Arial" fontWeight="600" fontSize="9" fill="#CC0066">EAL</text>
-      </svg>
-    ),
-  },
-  {
     name: "Mastercard",
     icon: (
       <svg viewBox="0 0 48 30" width="48" height="30" xmlns="http://www.w3.org/2000/svg">
@@ -72,39 +27,6 @@ const PAYMENT_METHODS = [
         <circle cx="18" cy="15" r="9" fill="#EB001B"/>
         <circle cx="30" cy="15" r="9" fill="#F79E1B"/>
         <path d="M24 7.8C26.1 9.3 27.5 11.5 27.5 15C27.5 18.5 26.1 20.7 24 22.2C21.9 20.7 20.5 18.5 20.5 15C20.5 11.5 21.9 9.3 24 7.8Z" fill="#FF5F00"/>
-      </svg>
-    ),
-  },
-  {
-    name: "PayPal",
-    icon: (
-      <svg viewBox="0 0 60 30" width="60" height="30" xmlns="http://www.w3.org/2000/svg">
-        <rect width="60" height="30" rx="4" fill="white" stroke="#E0E0E0" strokeWidth="0.8"/>
-        <text x="8" y="20" fontFamily="Arial" fontWeight="900" fontSize="12" fill="#003087">Pay</text>
-        <text x="27" y="20" fontFamily="Arial" fontWeight="900" fontSize="12" fill="#009CDE">Pal</text>
-      </svg>
-    ),
-  },
-  {
-    name: "Shop Pay",
-    icon: (
-      <svg viewBox="0 0 60 30" width="60" height="30" xmlns="http://www.w3.org/2000/svg">
-        <rect width="60" height="30" rx="4" fill="#5A31F4"/>
-        <text x="8" y="20" fontFamily="Arial" fontWeight="700" fontSize="10" fill="white">shop</text>
-      </svg>
-    ),
-  },
-  {
-    name: "UnionPay",
-    icon: (
-      <svg viewBox="0 0 60 30" width="60" height="30" xmlns="http://www.w3.org/2000/svg">
-        <rect width="60" height="30" rx="4" fill="white" stroke="#E0E0E0" strokeWidth="0.8"/>
-        <rect x="2" y="2" width="16" height="26" rx="2" fill="#E21836"/>
-        <rect x="20" y="2" width="16" height="26" rx="2" fill="#00447C"/>
-        <rect x="38" y="2" width="20" height="26" rx="2" fill="#007B40"/>
-        <text x="4" y="20" fontFamily="Arial" fontWeight="700" fontSize="7" fill="white">UP</text>
-        <text x="22" y="17" fontFamily="Arial" fontWeight="600" fontSize="6" fill="white">Union</text>
-        <text x="22" y="24" fontFamily="Arial" fontWeight="600" fontSize="6" fill="white">Pay</text>
       </svg>
     ),
   },

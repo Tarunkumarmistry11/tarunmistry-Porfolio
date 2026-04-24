@@ -52,6 +52,10 @@ const FAQ_ITEMS = [
     a: "Try using a different browser or incognito mode. The links are valid for 48 hours.",
   },
   {
+    q: "What happens if my download link expires after 48 hours?",
+    a: "The download link sent to your email is valid for 48 hours for security reasons. If it expires, simply reach out to our support team with your purchase details, and we will provide you with a fresh download link. Your purchase remains secure and accessible, as the expiration only applies to the link and not your access to the files. We are here to ensure you can access your presets and LUTs without any hassle.",
+  },
+  {
     q: "How do I install them?",
     a: "Detailed installation instructions are included with every purchase for both mobile and desktop.",
   },
@@ -79,7 +83,7 @@ export default function Shop() {
 
   const titleRef = useRef(null);
   const gridRef = useRef(null);
-   const sortRef = useRef(null);
+  const sortRef = useRef(null);
 
   // Get user country
   useEffect(() => {
@@ -125,14 +129,14 @@ export default function Shop() {
     return () => window.removeEventListener("click", handleClickOutside);
   }, [sortOpen]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (!sortRef.current) return;
 
     if (sortOpen) {
       gsap.fromTo(
         sortRef.current,
         { opacity: 0, y: -10, scale: 0.96 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.25, ease: "power2.out" }
+        { opacity: 1, y: 0, scale: 1, duration: 0.25, ease: "power2.out" },
       );
     } else {
       gsap.to(sortRef.current, {
@@ -234,8 +238,7 @@ export default function Shop() {
             marginTop: "120px",
           }}
         >
-          Presets · LUTs · Prints · All delivered via
-          email
+          Presets · LUTs · Prints · All delivered via email
         </p>
 
         <style>{`
@@ -343,7 +346,7 @@ export default function Shop() {
 
             {sortOpen && (
               <div
-              ref={sortRef}
+                ref={sortRef}
                 onClick={(e) => e.stopPropagation()}
                 style={{
                   position: "absolute",
@@ -377,7 +380,7 @@ export default function Shop() {
                         fontSize: "0.8rem",
                         color: active ? "var(--fg)" : "var(--fg60)",
                         padding: "14px 18px",
-                        cursor: "pointer",              
+                        cursor: "pointer",
                       }}
                     >
                       {label}
@@ -464,29 +467,55 @@ export default function Shop() {
             maxWidth: "820px",
           }}
         >
-          <p style={{ marginBottom: "1.2em", fontFamily: "'Playfair Display', serif", }}>
+          <p
+            style={{
+              marginBottom: "1.2em",
+              fontFamily: "'Playfair Display', serif",
+            }}
+          >
             Created by EL3V3N, these Lightroom presets and editing guides are
             the result of years spent observing light, shaping color, and
             refining a visual language that feels both cinematic and honest.
           </p>
-          <p style={{ marginBottom: "1.2em", fontFamily: "'Playfair Display', serif", }}>
+          <p
+            style={{
+              marginBottom: "1.2em",
+              fontFamily: "'Playfair Display', serif",
+            }}
+          >
             Every tone, every contrast, every subtle shift has been carefully
             crafted to help you achieve a distinctive and immersive look in your
             images.
           </p>
-          <p style={{ marginBottom: "1.2em", fontFamily: "'Playfair Display', serif", }}>
+          <p
+            style={{
+              marginBottom: "1.2em",
+              fontFamily: "'Playfair Display', serif",
+            }}
+          >
             These are not just presets, they are a reflection of a daily
             workflow. The same tools and techniques used consistently to shape
             photographs, build a visual identity, and tell stories that feel
             atmospheric and real.
           </p>
-          <p style={{ marginBottom: "1.2em", fontFamily: "'Playfair Display', serif", }}>
+          <p
+            style={{
+              marginBottom: "1.2em",
+              fontFamily: "'Playfair Display', serif",
+            }}
+          >
             By stepping into this process, you are not just applying edits, you
             are learning how to see. You will understand how to build mood,
             control color with intention, and create a cohesive style across
             your work.
           </p>
-          <p style={{ marginTop: "1.2em", fontFamily: "'Playfair Display', serif",color: "var(--fg60)" }}>
+          <p
+            style={{
+              marginTop: "1.2em",
+              fontFamily: "'Playfair Display', serif",
+              color: "var(--fg60)",
+            }}
+          >
             This is about giving you the clarity, control, and confidence to
             create images that feel like your own, consistent, expressive, and
             deeply cinematic.{" "}
@@ -520,13 +549,23 @@ export default function Shop() {
             maxWidth: "780px",
           }}
         >
-          <p style={{ marginBottom: "2em", fontFamily: "'Playfair Display', serif", }}>
+          <p
+            style={{
+              marginBottom: "2em",
+              fontFamily: "'Playfair Display', serif",
+            }}
+          >
             Our <strong>LUTs (Video Filters)</strong> can be easily imported
             into the free version of VN Video app to edit on your mobile. They
             can also be used in any other video editing apps that accept LUT
             files such as DaVinci Resolve, Premiere Pro.
           </p>
-          <p style={{ marginBottom: "2em", fontFamily: "'Playfair Display', serif", }}>
+          <p
+            style={{
+              marginBottom: "2em",
+              fontFamily: "'Playfair Display', serif",
+            }}
+          >
             Our <strong>Photo Preset Filters</strong> are designed to be used
             both in the free version of Lightroom Mobile app and also on the
             desktop Lightroom app.

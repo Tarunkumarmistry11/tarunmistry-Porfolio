@@ -82,7 +82,10 @@ a: `For the best experience, download your files using Chrome on either your pho
 
 If the issue continues, do not worry, just reach out and you will be guided through it. The goal is to make sure you receive everything without friction.`,
 },
-
+{
+q: "What happens if my download link expires after 48 hours?",
+a: `The download link sent to your email is valid for 48 hours for security reasons. If it expires, simply reach out to our support team with your purchase details, and we will provide you with a fresh download link. Your purchase remains secure and accessible, as the expiration only applies to the link and not your access to the files. We are here to ensure you can access your presets and LUTs without any hassle.`,
+},
 {
 q: "How do I install the presets and LUTs?",
 a: `Each purchase includes a step-by-step installation guide. The process is designed to be simple, even if you are new to editing.

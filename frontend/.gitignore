@@ -12,17 +12,14 @@ lerna-debug.log*
 .env.local
 .env.*.local
 *.env
-
-# Keep example file for developers
 !.env.example
 
-# If you have env files in subfolders
+backend/.env
+backend/.env.local
+backend/.env.*.local
 frontend/.env
 frontend/.env.local
 frontend/.env.*.local
-backend/.env          # add if you have backend too
-backend/.env.local
-
 node_modules
 dist
 dist-ssr
