@@ -4,6 +4,8 @@ const router  = express.Router();
 // Import only the active controllers — Stripe commented out until keys are ready
 const {
   createRazorpayOrder,
+  getQRCode,
+  pollPaymentStatus,
   verifyRazorpayPayment,
   getOrder,
 } = require("../controllers/orderController");
@@ -14,6 +16,10 @@ router.post("/razorpay/create", createRazorpayOrder);
 
 // Step 2: frontend calls this after user pays in the modal to verify + fulfil
 router.post("/razorpay/verify", verifyRazorpayPayment);
+
+// ── Razorpay: UPI / QR flow ───────────────────────────────
+router.get("/razorpay/qr/:orderId",     getQRCode);
+router.get("/razorpay/status/:orderId", pollPaymentStatus);
 
 // Fetch order details for the success page (excludes download links)
 router.get("/:id", getOrder);

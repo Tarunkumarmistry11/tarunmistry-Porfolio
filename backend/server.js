@@ -12,6 +12,8 @@ const orderRoutes = require("./routes/orderRoutes");
 // const webhookRoutes = require("./routes/webhookRoutes"); // ← commented for now
 const newsletterRoutes = require("./routes/newsletterRoutes");
 
+const {razorpayWebhook} = require("./controllers/orderController"); // ← exported to be mounted in server.js
+
 // ── STRIPE WEBHOOK (commented out — uncomment when STRIPE_SECRET_KEY is ready)
 // IMPORTANT: stripeWebhook must be mounted BEFORE express.json() because
 // Stripe requires the raw (unparsed) request body to verify the signature.
@@ -37,6 +39,15 @@ app.use(
   })
 );
 
+// WEBHOOK — raw body MUST come before express.json()
+// Razorpay sends raw JSON; we need the Buffer for HMAC-SHA256 verification
+// ══════════════════════════════════════════════════════════════════════════
+app.post(
+  "/api/orders/razorpay/webhook",
+  express.raw({ type: "application/json" }),
+  razorpayWebhook
+);
+
 app.use(express.json());
 
 // API Routes
@@ -56,6 +67,7 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
   console.log(`   Razorpay: ${process.env.RAZORPAY_KEY_ID ? "✓ configured" : "✗ RAZORPAY_KEY_ID missing"}`);
+  console.log(`   Webhook:  ${process.env.RAZORPAY_WEBHOOK_SECRET  ? "✓" : "⚠ RAZORPAY_WEBHOOK_SECRET not set (ok for dev)"}`);
   console.log(`   Email:    ${process.env.SMTP_USER    ? "✓ configured" : "✗ SMTP_USER missing"}`);
   console.log(`   Supabase: ${process.env.SUPABASE_URL ? "✓ configured" : "✗ SUPABASE_URL missing"}`);
 });

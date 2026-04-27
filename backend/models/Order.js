@@ -26,6 +26,7 @@ const orderSchema = new mongoose.Schema({
 
   downloadLinks: [String],
   emailSent: { type: Boolean, default: false },
+  expiryTime:{type: Date, default: null },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Order", orderSchema);

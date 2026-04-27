@@ -51,7 +51,40 @@ const verifySignature = (razorpayOrderId, razorpayPaymentId, signature) => {
   return expected === signature;
 };
 
-module.exports = { createOrder, verifySignature };
+/**
+ * createQRCode — creates a UPI QR code on Razorpay's servers.
+ *
+ * IMPORTANT: QR codes are short-lived (5 min default for payments).
+ * A QR code can accept multiple payments, but for our flow, we create one per order.
+ * The QR code image URL is used to display the QR to the user.
+ *
+ * @param {number} amount  - amount in INR (rupees)
+ * @param {number} expiryTime - expiry in seconds (default 300 for 5 min)
+ * @returns {Promise<object>} Razorpay QR code object with .id, .image_url, .expires_at etc.
+ */
+const createQRCode = async ({ amount, expiryTime = 300 }) => {
+  return razorpay.qrCode.create({
+    upi_link: {
+      upi_string: `upi://pay?tr=neft`,  // Placeholder; Razorpay handles actual routing
+      expiry_time: expiryTime,
+    },
+    amount:   Math.round(amount * 100), // convert rupees → paise
+    currency: "INR",
+    close_reason: "on_expiry",  // automatically close QR when it expires
+  });
+};
+
+/**
+ * fetchQRCode — fetch details of an existing QR code by ID.
+ *
+ * @param {string} qrCodeId - Razorpay QR code ID
+ * @returns {Promise<object>} QR code details including image_url and status
+ */
+const fetchQRCode = async (qrCodeId) => {
+  return razorpay.qrCode.fetch(qrCodeId);
+};
+
+module.exports = { createOrder, verifySignature, createQRCode, fetchQRCode };
 
 // ── STRIPE (commented out — uncomment when STRIPE_SECRET_KEY is available) ────
 // const Stripe = require("stripe");

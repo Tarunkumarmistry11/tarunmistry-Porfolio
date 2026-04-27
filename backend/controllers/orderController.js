@@ -1,5 +1,6 @@
 const Order    = require("../models/Order");
 const Product  = require("../models/Product");
+const Razorpay  = require("razorpay");
 
 // Active payment service — Razorpay only
 const { createOrder: createRzOrder, verifySignature } =
@@ -23,6 +24,18 @@ const { getSignedDownloadUrl } = require("../services/supabaseService");
 //  - Sends email only once (emailSent flag prevents duplicates).
 //  - If a product has no downloadFiles (e.g. physical print), it is skipped.
 // ════════════════════════════════════════════════════════════════════════════
+
+// Needed here (separate from razorpayService) to call the QR Code API directly
+const razorpay = new Razorpay({
+  key_id:     process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
+// QR expiry window — 5 minutes in milliseconds
+const QR_EXPIRY_MS = 5 * 60 * 1000;
+
+
+
 const fulfilOrder = async (orderId, paymentId) => {
   // Load the order with product details populated
   const order = await Order.findById(orderId).populate("items.product");
@@ -261,12 +274,201 @@ const getOrder = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+const getQRCode = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      res.status(404);
+      throw new Error("Order not found");
+    }
+
+    // Already paid — tell frontend to skip QR and go to success
+    if (order.paymentStatus === "paid") {
+      return res.json({
+        alreadyPaid: true,
+        email:       order.email,
+        orderId:     order._id,
+      });
+    }
+
+    // If the QR has expired or order explicitly failed, create a fresh Razorpay order
+    // so we get a new QR that isn't tied to the old closed order
+    const isExpired = order.expiryTime && new Date() > new Date(order.expiryTime);
+    if (order.paymentStatus === "expired" || (isExpired && order.paymentStatus !== "paid")) {
+      const rzOrder = await createRzOrder({
+        amount:  order.subtotal,
+        receipt: `rcpt_retry_${Date.now()}`,
+      });
+      order.paymentStatus = "pending";
+      order.paymentId     = rzOrder.id;
+      order.expiryTime    = null;
+      await order.save();
+    }
+
+    // Set 5-minute expiry from now
+    const expiryTime = new Date(Date.now() + QR_EXPIRY_MS);
+    order.expiryTime = expiryTime;
+    await order.save();
+
+    // closeBy must be a Unix timestamp in seconds — Razorpay closes QR at this time
+    const closeByTimestamp = Math.floor(expiryTime.getTime() / 1000);
+
+    let qrData;
+    try {
+      // Razorpay QR Code API — requires live/test key with QR feature enabled
+      qrData = await razorpay.qrCode.create({
+        type:           "upi_qr",
+        name:           "Tarun Mistry",
+        usage:          "single_use",   // QR invalidated after one scan
+        fixed_amount:   true,
+        payment_amount: order.subtotal * 100, // paise
+        description:    `Order ${order._id.toString().slice(-8).toUpperCase()}`,
+        close_by:       closeByTimestamp,
+        notes: {
+          order_db_id: order._id.toString(), // used by webhook to find this order
+          email:       order.email,
+        },
+      });
+    } catch (qrErr) {
+      // QR API not available on all test keys — send null image URL
+      // Frontend shows a "QR not available in test mode" placeholder
+      console.warn("[getQRCode] Razorpay QR API error:", qrErr.message);
+      qrData = { id: `qr_fallback_${Date.now()}`, image_url: null };
+    }
+
+    res.json({
+      qrId:       qrData.id,
+      qrImageUrl: qrData.image_url,  // null in test mode — frontend handles this
+      expiryTime: expiryTime.toISOString(),
+      orderId:    order._id,
+      amount:     order.subtotal,
+    });
+
+  } catch (err) { next(err); }
+};
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// GET /api/orders/razorpay/status/:orderId
+//
+// Polling endpoint — called by frontend every 3 seconds while QR is shown.
+// READ-ONLY: just checks current DB status. Never fulfils here.
+// Fulfilment only happens via webhook or /verify to avoid race conditions.
+//
+// Returns { status: "pending" | "paid" | "failed" | "expired" }
+// ════════════════════════════════════════════════════════════════════════════
+const pollPaymentStatus = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+
+    // Only fetch the fields we need — lighter query
+    const order = await Order.findById(orderId)
+      .select("paymentStatus expiryTime email");
+
+    if (!order) {
+      res.status(404);
+      throw new Error("Order not found");
+    }
+
+    // Check if QR window has expired (order still pending but time is up)
+    if (
+      order.paymentStatus === "pending" &&
+      order.expiryTime &&
+      new Date() > new Date(order.expiryTime)
+    ) {
+      // Mark as expired in DB so next poll (and retry) sees the correct state
+      order.paymentStatus = "expired";
+      await order.save();
+      return res.json({ status: "expired" });
+    }
+
+    // If paid, include email so frontend can show it on the success page
+    if (order.paymentStatus === "paid") {
+      return res.json({
+        status:  "paid",
+        email:   order.email,
+        orderId: order._id,
+      });
+    }
+
+    // pending / failed / expired — just return the status
+    res.json({ status: order.paymentStatus });
+
+  } catch (err) { next(err); }
+};
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// Razorpay webhook handler — receives events when QR is paid
+// Mounted in server.js BEFORE express.json() (needs raw body for HMAC verify)
+// ════════════════════════════════════════════════════════════════════════════
+const crypto = require("crypto");
+
+const razorpayWebhook = async (req, res) => {
+  try {
+    const receivedSig = req.headers["x-razorpay-signature"];
+    const secret      = process.env.RAZORPAY_WEBHOOK_SECRET;
+
+    if (!secret) {
+      // Webhook secret not configured — skip verification in dev
+      console.warn("[razorpayWebhook] RAZORPAY_WEBHOOK_SECRET not set — skipping signature check");
+    } else {
+      const expectedSig = crypto
+        .createHmac("sha256", secret)
+        .update(req.body) // raw Buffer
+        .digest("hex");
+
+      if (receivedSig !== expectedSig) {
+        console.warn("[razorpayWebhook] Invalid signature — ignoring event");
+        return res.status(400).json({ error: "Invalid signature" });
+      }
+    }
+
+    // Parse now that signature is verified
+    const event = JSON.parse(req.body.toString());
+    console.log(`[razorpayWebhook] Received event: ${event.event}`);
+
+    // QR payment credited
+    if (event.event === "qr_code.credited") {
+      const payment   = event.payload.payment.entity;
+      const qrNotes   = event.payload.qr_code?.entity?.notes || {};
+      const orderDbId = qrNotes.order_db_id;
+      if (orderDbId) {
+        await fulfilOrder(orderDbId, payment.id);
+        console.log(`[razorpayWebhook] QR payment fulfilled for order ${orderDbId}`);
+      }
+    }
+
+    // Standard order payment captured (card/netbanking modal)
+    if (event.event === "payment.captured") {
+      const payment = event.payload.payment.entity;
+      const order   = await Order.findOne({ paymentId: payment.order_id });
+      if (order && order.paymentStatus !== "paid") {
+        await fulfilOrder(order._id.toString(), payment.id);
+        console.log(`[razorpayWebhook] Modal payment fulfilled for order ${order._id}`);
+      }
+    }
+
+    // Always 200 — Razorpay retries on non-200
+    res.json({ received: true });
+
+  } catch (err) {
+    console.error("[razorpayWebhook] Error:", err.message);
+    res.status(200).json({ received: true, error: err.message });
+  }
+};
+
 
 module.exports = {
   createRazorpayOrder,
   verifyRazorpayPayment,
   getOrder,
   fulfilOrder, // exported so webhook can call it when Stripe is added
+  getQRCode,
+  pollPaymentStatus,
+  razorpayWebhook, // exported to be mounted in server.js
 };
 
 
